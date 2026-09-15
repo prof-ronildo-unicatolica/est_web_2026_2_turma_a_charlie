@@ -1,6 +1,5 @@
-from sqlalchemy.orm import Session
-from app.models.hotel import Cidade
 from sqlalchemy.orm import Session, joinedload
+
 from app.models.hotel import Cidade, Hotel
 
 
@@ -21,6 +20,7 @@ class CidadeRepository:
         return self.db.query(Cidade).order_by(Cidade.nome).all()
 
     def get_by_id(self, cidade_id) -> Cidade | None:
+        """Devolve None quando nao existe."""
         return self.db.query(Cidade).filter(Cidade.id == cidade_id).first()
 
     def get_by_nome(self, nome: str) -> Cidade | None:

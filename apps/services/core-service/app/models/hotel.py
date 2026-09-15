@@ -4,9 +4,6 @@ from typing import List
 from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-# A MESMA Base do restante do projeto. Nao crie outra: uma segunda Base
-# significa um segundo registro de metadados, e o Alembic nao enxergaria
-# estas tabelas -- em silencio, sem erro.
 from app.models.tutorial import Base
 
 
