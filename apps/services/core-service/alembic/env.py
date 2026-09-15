@@ -7,6 +7,7 @@ from alembic import context
 # Importar modelos e configurações
 from app.core.config import settings
 from app.models.tutorial import Base
+from app.models import hotel  # noqa: F401
 
 # Objeto de configuração do Alembic
 config = context.config
@@ -21,6 +22,12 @@ config.set_main_option("sqlalchemy.url", settings.SQLALCHEMY_DATABASE_URI)
 # Objeto Metadata para geração automática de migrações
 target_metadata = Base.metadata
 
+#ignora usuarios por enquanto.
+def include_object(object, name, type_, reflected, compare_to):
+    if type_ == "table" and name == "usuarios" and reflected:
+        return False
+    return True
+
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode."""
@@ -30,6 +37,7 @@ def run_migrations_offline() -> None:
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        include_object=include_object,
     )
 
     with context.begin_transaction():
@@ -45,7 +53,7 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(connection=connection, target_metadata=target_metadata)
+        context.configure(connection=connection, target_metadata=target_metadata, include_object=include_object)
 
         with context.begin_transaction():
             context.run_migrations()
