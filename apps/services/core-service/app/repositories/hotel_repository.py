@@ -1,6 +1,7 @@
-from sqlalchemy.orm import Session
-from app.models.hotel import Cidade
+from typing import List
+
 from sqlalchemy.orm import Session, joinedload
+
 from app.models.hotel import Cidade, Hotel
 
 
@@ -17,7 +18,7 @@ class CidadeRepository:
         self.db.refresh(cidade)
         return cidade
 
-    def list(self) -> list[Cidade]:
+    def list(self) -> List[Cidade]:
         return self.db.query(Cidade).order_by(Cidade.nome).all()
 
     def get_by_id(self, cidade_id) -> Cidade | None:
@@ -40,7 +41,7 @@ class HotelRepository:
         self.db.refresh(hotel)
         return hotel
 
-    def list(self) -> list[Hotel]:
+    def list(self) -> List[Hotel]:
         return (
             self.db.query(Hotel)
             .options(joinedload(Hotel.cidade))
@@ -48,7 +49,7 @@ class HotelRepository:
             .all()
         )
 
-    def list_by_cidade(self, cidade_id) -> list[Hotel]:
+    def list_by_cidade(self, cidade_id) -> List[Hotel]:
         return (
             self.db.query(Hotel)
             .options(joinedload(Hotel.cidade))
