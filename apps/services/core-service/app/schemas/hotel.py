@@ -10,7 +10,7 @@ class HotelCreateSchema(BaseModel):
 
     nome: str = Field(min_length=1, max_length=100)
     cidade_id: uuid.UUID
-
+    categoria_estrelas: int = Field(ge=1, le=5)
 
 class HotelResponseSchema(BaseModel):
     """Dados devolvidos pela API."""

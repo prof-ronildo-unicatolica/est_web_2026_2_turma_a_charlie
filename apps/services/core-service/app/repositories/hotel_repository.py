@@ -11,10 +11,10 @@ class CidadeRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def create(self, nome: str) -> Cidade:
+    def create(self, nome: str, estado: str) -> Cidade:
         cidade = Cidade(
             nome=nome,
-            estado="CE",
+            estado=estado,
         )
         self.db.add(cidade)
         self.db.commit()
@@ -37,11 +37,16 @@ class HotelRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def create(self, nome: str, cidade_id) -> Hotel:
+    def create(
+        self,
+        nome: str,
+        cidade_id,
+        categoria_estrelas: int,
+    ) -> Hotel:
         hotel = Hotel(
             nome=nome,
             cidade_id=cidade_id,
-            categoria_estrelas=3,
+            categoria_estrelas=categoria_estrelas,
         )
         self.db.add(hotel)
         self.db.commit()
@@ -51,7 +56,10 @@ class HotelRepository:
     def list(self) -> List[Hotel]:
         return (
             self.db.query(Hotel)
-            .options(joinedload(Hotel.cidade))
+            .options(
+                joinedload(Hotel.cidade),
+                joinedload(Hotel.quartos),
+            )
             .order_by(Hotel.nome)
             .all()
         )
@@ -59,7 +67,10 @@ class HotelRepository:
     def list_by_cidade(self, cidade_id) -> List[Hotel]:
         return (
             self.db.query(Hotel)
-            .options(joinedload(Hotel.cidade))
+            .options(
+                joinedload(Hotel.cidade),
+                joinedload(Hotel.quartos),
+            )
             .filter(Hotel.cidade_id == cidade_id)
             .order_by(Hotel.nome)
             .all()
@@ -68,7 +79,10 @@ class HotelRepository:
     def get_by_id(self, hotel_id) -> Hotel | None:
         return (
             self.db.query(Hotel)
-            .options(joinedload(Hotel.cidade))
+            .options(
+                joinedload(Hotel.cidade),
+                joinedload(Hotel.quartos),
+            )
             .filter(Hotel.id == hotel_id)
             .first()
         )
