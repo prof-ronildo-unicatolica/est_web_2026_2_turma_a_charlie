@@ -171,7 +171,7 @@ function App() {
 
         <section className="hero">
 
-          
+
             <div className="hero-content">
               <div className="hero-text">
                 <h1>

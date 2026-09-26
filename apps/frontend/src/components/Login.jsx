@@ -38,7 +38,7 @@ export default function Login({ onVoltar, onLogin }) {
 
      // Atualiza o App e volta para a Home.
     onLogin(data.access_token)
-    
+
     } catch (error) {
       console.error(error)
       setErro(error.message)
