@@ -1,89 +1,77 @@
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db, get_mongo_db
-from app.schemas.cidade import CidadeCreate, CidadePublic
+from app.models.hotel import Cidade
 from app.schemas.hotel import HotelCreateSchema, HotelResponseSchema
-from app.services.hotel_service import CidadeService, HotelService
+from app.services.hotel_service import HotelService
 
-router = APIRouter()
+
+router = APIRouter(
+    prefix="/hoteis",
+    tags=["Hoteis"],
+)
 
 
 @router.post(
-    "/cidades",
-    response_model=CidadePublic,
-    status_code=201,
-)
-def criar_cidade(
-    payload: CidadeCreate,
-    db: Session = Depends(get_db),
-):
-    service = CidadeService(db)
-
-    cidade_existente = service.get_by_nome(payload.nome)
-
-    if cidade_existente:
-        raise HTTPException(
-            status_code=409,
-            detail="Cidade ja cadastrada.",
-        )
-
-    return service.create(payload)
-
-
-@router.get(
-    "/cidades",
-    response_model=list[CidadePublic],
-)
-def listar_cidades(
-    db: Session = Depends(get_db),
-):
-    service = CidadeService(db)
-    return service.list()
-
-
-@router.post(
-    "/hoteis",
+    "",
     response_model=HotelResponseSchema,
-    status_code=201,
+    status_code=status.HTTP_201_CREATED,
 )
-async def criar_hotel(
+def criar_hotel(
     payload: HotelCreateSchema,
     db: Session = Depends(get_db),
     mongo_db=Depends(get_mongo_db),
 ):
     service = HotelService(db, mongo_db)
 
-    cidade = CidadeService(db).get_by_id(payload.cidade_id)
+    cidade = db.query(Cidade).filter(
+        Cidade.id == payload.cidade_id
+    ).first()
 
     if not cidade:
         raise HTTPException(
-            status_code=404,
-            detail="Cidade nao encontrada.",
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Cidade não encontrada.",
         )
 
-    return await service.create(payload)
+    return service.create(payload)
 
 
 @router.get(
-    "/hoteis",
+    "",
     response_model=list[HotelResponseSchema],
 )
 def listar_hoteis(
+    cidade_id: uuid.UUID | None = None,
     db: Session = Depends(get_db),
     mongo_db=Depends(get_mongo_db),
 ):
     service = HotelService(db, mongo_db)
+
+    if cidade_id:
+        cidade = db.query(Cidade).filter(
+            Cidade.id == cidade_id
+        ).first()
+
+        if not cidade:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Cidade não encontrada.",
+            )
+
+        return service.list_by_cidade(cidade_id)
+
     return service.list()
 
 
 @router.get(
-    "/hoteis/{hotel_id}",
+    "/{hotel_id}",
     response_model=HotelResponseSchema,
 )
-def buscar_hotel(
+def obter_hotel(
     hotel_id: uuid.UUID,
     db: Session = Depends(get_db),
     mongo_db=Depends(get_mongo_db),
@@ -94,8 +82,8 @@ def buscar_hotel(
 
     if not hotel:
         raise HTTPException(
-            status_code=404,
-            detail="Hotel nao encontrado.",
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Hotel não encontrado.",
         )
 
     return hotel
@@ -110,16 +98,16 @@ def listar_hoteis_por_cidade(
     db: Session = Depends(get_db),
     mongo_db=Depends(get_mongo_db),
 ):
-    cidade_service = CidadeService(db)
-
-    cidade = cidade_service.get_by_id(cidade_id)
+    cidade = db.query(Cidade).filter(
+        Cidade.id == cidade_id
+    ).first()
 
     if not cidade:
         raise HTTPException(
-            status_code=404,
-            detail="Cidade nao encontrada.",
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Cidade não encontrada.",
         )
 
-    hotel_service = HotelService(db, mongo_db)
+    service = HotelService(db, mongo_db)
 
-    return hotel_service.list_by_cidade(cidade_id)
+    return service.list_by_cidade(cidade_id)
