@@ -65,6 +65,7 @@ class HotelRepository:
         self.db.add(hotel)
         self.db.commit()
         self.db.refresh(hotel)
+
         return hotel
 
     def list(self) -> List[Hotel]:
@@ -105,14 +106,14 @@ class HotelRepository:
         )
 
     def get_comodidades_by_ids(
-    self,
-    comodidade_ids: List[int],
+        self,
+        comodidade_ids: List[int],
     ) -> List[Comodidade]:
         if not comodidade_ids:
             return []
 
         return (
-        self.db.query(Comodidade)
-        .filter(Comodidade.id.in_(comodidade_ids))
-        .all()
-    )
+            self.db.query(Comodidade)
+            .filter(Comodidade.id.in_(comodidade_ids))
+            .all()
+        )

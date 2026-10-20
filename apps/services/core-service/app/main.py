@@ -43,12 +43,12 @@ app.include_router(health_router, prefix=settings.API_V1_STR)
 app.include_router(sobre_router, prefix=settings.API_V1_STR)
 app.include_router(auth_router, prefix=settings.API_V1_STR)
 app.include_router(quartos_router, prefix=settings.API_V1_STR)
-app.include_router(comodidades_router, prefix="/api/v1")
-
+app.include_router(comodidades_router, prefix=settings.API_V1_STR)
 app.include_router(hoteis_router, prefix=settings.API_V1_STR)
 app.include_router(busca_router, prefix=settings.API_V1_STR)
 app.include_router(cidades_router, prefix=settings.API_V1_STR)
 
+
 @app.get("/")
 def read_root():
-    return {"message": "Seja bem-vindo ao Core Service nosso Sistema de Reservas!"}
+    return {"message": "Bem-vindo ao Core Service do Sistema de Reservas!"}
