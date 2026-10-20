@@ -4,7 +4,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db, get_mongo_db
-from app.models.hotel import Cidade
+from app.mensagens import HOTEL_NAO_ENCONTRADO
+from app.schemas.cidade import CidadeCreate, CidadePublic
 from app.schemas.hotel import HotelCreateSchema, HotelResponseSchema
 from app.services.hotel_service import HotelService
 
@@ -82,8 +83,8 @@ def obter_hotel(
 
     if not hotel:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Hotel não encontrado.",
+            status_code=404,
+            detail=HOTEL_NAO_ENCONTRADO,
         )
 
     return hotel
