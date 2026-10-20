@@ -1,5 +1,3 @@
-from decimal import Decimal
-
 from sqlalchemy.orm import Session
 
 from app.repositories.catalogo_repository import CatalogoRepository
@@ -33,11 +31,7 @@ class CatalogoSyncService:
                 {
                     "quarto_id": str(quarto.id),
                     "tipo": quarto.tipo,
-                    "preco_diaria": float(
-                        quarto.preco_diaria
-                        if isinstance(quarto.preco_diaria, Decimal)
-                        else quarto.preco_diaria
-                    ),
+                    "preco_diaria": float(quarto.preco_diaria),
                     "max_adultos": quarto.max_adultos,
                     "max_criancas": quarto.max_criancas,
                 }
