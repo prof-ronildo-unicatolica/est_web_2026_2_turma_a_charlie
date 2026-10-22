@@ -9,5 +9,5 @@ POSTGRES_DB=hotel_db_dev
 POSTGRES_PORT=5432
 
 # MongoDB Config
-MONGODB_URL=mongodb://admin:admin123@localhost:27017
+MONGODB_URL=mongodb://USUARIO:SENHA@localhost:27017/?authSource=admin
 MONGODB_DB=hotel_mongo_dev

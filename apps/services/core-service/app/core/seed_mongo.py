@@ -2,6 +2,7 @@ import logging
 
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from passlib.context import CryptContext
+from app.core.config import settings
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 logger = logging.getLogger(__name__)
@@ -12,7 +13,7 @@ async def seed_mongo_users(db: AsyncIOMotorDatabase):
         users_collection = db["users"]
         existing_user = await users_collection.find_one({"email": "admin@hotel.com"})
         if not existing_user:
-            hashed_password = pwd_context.hash("admin123")
+            hashed_password = pwd_context.hash(settings.MONGO_ADMIN_PASSWORD)
             admin_user = {
                 "username": "admin",
                 "email": "admin@hotel.com",
