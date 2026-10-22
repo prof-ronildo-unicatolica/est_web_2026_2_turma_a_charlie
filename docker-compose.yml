@@ -26,7 +26,7 @@ services:
     restart: unless-stopped
     environment:
       - MONGO_INITDB_ROOT_USERNAME=admin
-      - MONGO_INITDB_ROOT_PASSWORD=admin123
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
     ports:
       - "27017:27017"
     volumes:
@@ -66,7 +66,8 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=hotel_db_dev
       - POSTGRES_PORT=5432
-      - MONGODB_URL=mongodb://admin:admin123@mongodb:27017
+      - MONGODB_URL=${MONGODB_URL}
+      - MONGO_ADMIN_PASSWORD=${MONGO_ADMIN_PASSWORD}
       - MONGODB_DB=hotel_mongo_dev
       - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
     ports:
@@ -97,7 +98,7 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=hotel_db_dev
       - POSTGRES_PORT=5432
-      - MONGODB_URL=mongodb://admin:admin123@mongodb:27017
+      - MONGODB_URL=${MONGODB_URL}
       - MONGODB_DB=hotel_mongo_dev
       - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
     depends_on:
