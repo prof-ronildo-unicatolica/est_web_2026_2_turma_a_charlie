@@ -10,7 +10,6 @@ class UsuarioCreate(BaseModel):
     nome: str
     email: str
     senha: str
-    is_admin: bool = False
 
 
 class Token(BaseModel):
