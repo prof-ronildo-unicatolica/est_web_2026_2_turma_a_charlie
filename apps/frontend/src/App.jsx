@@ -1,143 +1,469 @@
 import { useEffect, useState } from 'react'
-import ProfessorProfile from './components/ProfessorProfile'
-import DisciplinasList from './components/DisciplinasList'
-import StacksTable from './components/StacksTable'
-import ImageAndCarousel from './components/ImageAndCarousel'
-import Sidebar from './components/Sidebar'
-import VideoComponent from './components/VideoComponent'
-import InteractiveExamples from './components/InteractiveExamples'
+import './custom.css'
+import Login from './components/Login'
+import HotelDetalhes from './components/HotelDetalhes'
 
-export default function App() {
-  const [data, setData] = useState(null)
-  const [error, setError] = useState(null)
+const API_URL = 'http://localhost:8000'
+
+function App() {
+  const [tela, setTela] = useState('home')
+  const [usuarioLogado, setUsuarioLogado] = useState(
+  localStorage.getItem('access_token')
+)
+  const [hotelSelecionado, setHotelSelecionado] = useState(null)
+  const [hoteis, setHoteis] = useState([])
   const [loading, setLoading] = useState(true)
+  const [erro, setErro] = useState(null)
+
+  const [cidade, setCidade] = useState('')
+  const [estrelas, setEstrelas] = useState('')
+  const [checkin, setCheckin] = useState('')
+  const [checkout, setCheckout] = useState('')
+  const [adultos, setAdultos] = useState(2)
+  const [criancas, setCriancas] = useState(0)
 
   useEffect(() => {
-    fetch('http://localhost:8000/api/v1/sobre')
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error('Falha ao se conectar com a API')
-        }
-        return res.json()
-      })
-      .then((json) => {
-        setData(json)
-        setLoading(false)
-      })
-      .catch((err) => {
-        setError(err.message)
-        setLoading(false)
-      })
+    carregarHoteis()
   }, [])
 
-  return (
-    <div className="bg-light min-vh-100 pb-5">
-      {/* Navbar de Exemplo */}
-      <nav className="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm mb-4 sticky-top">
-        <div className="container">
-          <a className="navbar-brand d-flex align-items-center" href="#">
-            <span className="fs-4 fw-bold text-primary">Rede Hoteleira</span>
-            <span className="ms-2 badge bg-secondary text-wrap small">Estágio II</span>
-          </a>
-          <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span className="navbar-toggler-icon"></span>
-          </button>
-          <div className="collapse navbar-collapse" id="navbarNav">
-            <ul className="navbar-nav me-auto">
-              <li className="nav-item">
-                <a className="nav-link active" href="#">Home</a>
-              </li>
-              <li className="nav-item">
-                <a className="nav-link" href="#tutorial-components">Tutorial</a>
-              </li>
-            </ul>
-            <div className="d-flex align-items-center gap-2">
-              <button className="btn btn-outline-primary btn-sm px-3" type="button">
-                Login
-              </button>
-              <button className="btn btn-primary btn-sm px-3" type="button">
-                Perfil
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav>
+  async function carregarHoteis() {
+    try {
+      setLoading(true)
 
-      {/* Cabecalho Principal */}
-      <div className="container">
-        <header className="mb-5 p-4 bg-white rounded shadow-sm">
-          <div className="row align-items-center">
-            <div className="col-md-8">
-              <h1 className="display-5 text-primary fw-bold">Sistemas de Informação - Estágio II</h1>
-              <p className="lead text-secondary mb-0">Projeto Monorepo Base (Boilerplate de Inicialização)</p>
-            </div>
-            <div className="col-md-4 text-md-end mt-3 mt-md-0">
-              <div className="d-flex justify-content-md-end gap-2">
-                <button className="btn btn-sm btn-outline-secondary" onClick={() => window.location.reload()}>
-                  Recarregar Dados
-                </button>
+      const response = await fetch(`${API_URL}/api/v1/busca/hoteis`)
+
+      if (!response.ok) {
+        throw new Error('Não foi possível carregar os hotéis.')
+      }
+
+      const data = await response.json()
+
+      setHoteis(data)
+      setErro(null)
+    } catch (error) {
+      console.error(error)
+      setErro('Não foi possível carregar os hotéis.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function pesquisar() {
+    try {
+      setLoading(true)
+
+      const params = new URLSearchParams()
+
+      if (cidade.trim()) {
+        params.append('cidade_id', cidade.trim())
+      }
+
+      if (estrelas) {
+        params.append('estrelas', estrelas)
+      }
+
+      const url = `${API_URL}/api/v1/busca/hoteis${
+        params.toString() ? `?${params.toString()}` : ''
+      }`
+
+      const response = await fetch(url)
+
+      if (!response.ok) {
+        throw new Error('Erro ao realizar busca.')
+      }
+
+      const data = await response.json()
+
+      setHoteis(data)
+      setErro(null)
+    } catch (error) {
+      console.error(error)
+      setErro('Não foi possível realizar a busca.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  if (tela === 'login') {
+  return (
+    <Login
+      onVoltar={() => setTela('home')}
+      onLogin={(token) => {
+        setUsuarioLogado(token)
+        setTela('home')
+      }}
+    />
+  )
+}
+
+  if (tela === 'detalhes' && hotelSelecionado) {
+    return (
+      <HotelDetalhes
+        hotel={hotelSelecionado}
+        onVoltar={() => setTela('home')}
+      />
+    )
+  }
+
+  function menorPreco(hotel) {
+    if (!hotel.quartos || hotel.quartos.length === 0) {
+      return null
+    }
+
+    return Math.min(
+      ...hotel.quartos.map((quarto) => Number(quarto.preco_diaria))
+    )
+  }
+
+  return (
+    <div className="hotel-app">
+
+      {/* HEADER */}
+      <header className="hotel-header">
+        <div className="hotel-logo">
+
+          <span className="logo-icon">✧</span>
+          <span>BEM-VINDO</span>
+
+        </div>
+
+
+        <nav className="hotel-nav">
+          <a href="#inicio">◉ <span>Explorar</span></a>
+          <a href="#reservas">▣ <span>Minhas reservas</span></a>
+          <a href="#favoritos">♡ <span>Favoritos</span></a>
+        </nav>
+
+        <div className="user-area">
+        <div className="user-icon">👤</div>
+
+        {usuarioLogado ? (
+          <>
+            <span>Olá, {usuarioLogado}</span>
+
+            <button
+              className="login-button"
+              onClick={() => {
+                localStorage.removeItem('access_token')
+                setUsuarioLogado(null)
+              }}
+            >
+              Sair
+            </button>
+          </>
+        ) : (
+          <>
+            <span>Olá, usuário</span>
+
+            <button
+              className="login-button"
+              onClick={() => setTela('login')}
+            >
+              Fazer login
+            </button>
+          </>
+        )}
+      </div>
+      </header>
+
+      {/* HERO */}
+      <main id="inicio">
+
+        <section className="hero">
+
+
+            <div className="hero-content">
+              <div className="hero-text">
+                <h1>
+                  Encontre sua
+                  <br />
+                  próxima estadia
+                </h1>
+
+                <p>
+                  Pesquise hotéis, datas e experiências inesquecíveis
+                </p>
               </div>
             </div>
-          </div>
-          <hr className="my-4" />
-          <div className="row g-3">
-            <div className="col-md-3 col-sm-6">
-              <strong>Equipe:</strong> <span className="text-secondary ms-1">{data?.equipe || 'Alpha'}</span>
-            </div>
-            <div className="col-md-3 col-sm-6">
-              <strong>Professor:</strong> <span className="text-secondary ms-1">{data?.professor?.nome || 'Ronildo Silva'}</span>
-            </div>
-            <div className="col-md-3 col-sm-6">
-              <strong>Ano:</strong> <span className="text-secondary ms-1">{data?.ano || '2026'}</span>
-            </div>
-            <div className="col-md-3 col-sm-6">
-              <strong>Semestre:</strong> <span className="text-secondary ms-1">{data?.semestre || '2'}</span>
-            </div>
-          </div>
-        </header>
 
-        {loading && (
-          <div className="text-center my-5 py-5">
-            <div className="spinner-border text-primary" role="status">
-              <span className="visually-hidden">Carregando dados da API...</span>
-            </div>
-            <p className="mt-3 text-secondary">Buscando informações do servidor backend...</p>
-          </div>
-        )}
 
-        {error && (
-          <div className="alert alert-danger shadow-sm p-4" role="alert">
-            <h4 className="alert-heading fw-bold">Erro de Conexão com o Backend!</h4>
-            <p>Não foi possível obter os dados da API em <code>http://localhost:8000/api/v1/sobre</code>.</p>
-            <p className="mb-0">Verifique se o backend está rodando e se os bancos de dados foram inicializados com sucesso.</p>
-            <hr />
-            <p className="mb-0 small text-muted">Detalhe do erro: {error}</p>
-          </div>
-        )}
+          {/* SEARCH BOX */}
+          <div className="search-box">
 
-        {!loading && !error && data && (
-          <div className="row g-4">
-            {/* Sidebar Lateral */}
-            <div className="col-md-3">
-              <Sidebar />
+            <div className="search-field destination">
+              <span className="field-icon">●</span>
+
+              <div>
+                <label>Para onde?</label>
+
+                <input
+                  type="text"
+                  placeholder="ID da cidade"
+                  value={cidade}
+                  onChange={(e) => setCidade(e.target.value)}
+                />
+              </div>
             </div>
 
-            {/* Conteúdo Principal */}
-            <div className="col-md-9" id="tutorial-components">
-              <ProfessorProfile professor={data.professor} />
-              <DisciplinasList disciplinas={data.disciplinas} />
-              <StacksTable stacks={data.stacks} />
-              <ImageAndCarousel />
-              <VideoComponent />
-              <InteractiveExamples />
+            <div className="search-field">
+              <span className="field-icon">▣</span>
+
+              <div>
+                <label>Check-in</label>
+
+                <input
+                  type="date"
+                  value={checkin}
+                  onChange={(e) => setCheckin(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="search-field">
+              <span className="field-icon">▣</span>
+
+              <div>
+                <label>Check-out</label>
+
+                <input
+                  type="date"
+                  value={checkout}
+                  onChange={(e) => setCheckout(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="search-field guests">
+              <span className="field-icon">♙</span>
+
+              <div>
+                <label>Hóspedes</label>
+
+                <div className="guest-controls">
+                  <select
+                    value={adultos}
+                    onChange={(e) => setAdultos(Number(e.target.value))}
+                  >
+                    {[1, 2, 3, 4, 5, 6].map((numero) => (
+                      <option key={numero} value={numero}>
+                        {numero} adulto{numero > 1 ? 's' : ''}
+                      </option>
+                    ))}
+                  </select>
+
+                  <select
+                    value={criancas}
+                    onChange={(e) => setCriancas(Number(e.target.value))}
+                  >
+                    {[0, 1, 2, 3, 4].map((numero) => (
+                      <option key={numero} value={numero}>
+                        {numero} criança{numero !== 1 ? 's' : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div className="search-field stars">
+              <div>
+                <label>Estrelas</label>
+
+                <select
+                  value={estrelas}
+                  onChange={(e) => setEstrelas(e.target.value)}
+                >
+                  <option value="">Todas</option>
+                  <option value="3">3 estrelas</option>
+                  <option value="4">4 estrelas</option>
+                  <option value="5">5 estrelas</option>
+                </select>
+              </div>
+            </div>
+
+            <button
+              className="search-button"
+              onClick={pesquisar}
+            >
+              Pesquisar
+            </button>
+
+          </div>
+        </section>
+
+        {/* HOTELS */}
+        <section className="hotel-section">
+
+          <div className="section-heading">
+            <h2>Sugestões para você</h2>
+
+            <button onClick={carregarHoteis}>
+              Ver todas →
+            </button>
+          </div>
+
+          {erro && (
+            <div className="error-message">
+              {erro}
+            </div>
+          )}
+
+          {loading ? (
+            <div className="hotel-grid">
+
+              {[1, 2, 3].map((item) => (
+                <div className="hotel-card skeleton-card" key={item}>
+                  <div className="skeleton image-skeleton"></div>
+
+                  <div className="hotel-info">
+                    <div className="skeleton line-skeleton"></div>
+                    <div className="skeleton small-skeleton"></div>
+                    <div className="skeleton small-skeleton"></div>
+                  </div>
+                </div>
+              ))}
+
+            </div>
+          ) : (
+            <div className="hotel-grid">
+
+              {hoteis.map((hotel) => {
+
+                const preco = menorPreco(hotel)
+
+                return (
+                  <article
+                      className="hotel-card"
+                      key={hotel.hotel_id}
+                      onClick={() => {
+                        setHotelSelecionado(hotel)
+                        setTela('detalhes')
+                      }}>
+
+                    <div className="hotel-image">
+
+                      <img
+                        src={`https://images.unsplash.com/photo-${
+                          [
+                            '1566073771259-6a8506099945',
+                            '1582719478250-c89cae4dc85b',
+                            '1564501049412-61c2a3083791',
+                          ][Math.abs(
+                            hotel.hotel_id
+                              .split('')
+                              .reduce(
+                                (total, letra) =>
+                                  total + letra.charCodeAt(0),
+                                0
+                              )
+                          ) % 3]
+                        }?auto=format&fit=crop&w=700&q=80`}
+                        alt={hotel.nome}
+                      />
+
+                      <button className="favorite-button">
+                        ♡
+                      </button>
+                    </div>
+
+                    <div className="hotel-info">
+
+                      <h3>{hotel.nome}</h3>
+
+                      <p className="hotel-location">
+                        <span>●</span>
+                        {hotel.cidade_nome}, {hotel.cidade_estado}
+                      </p>
+
+                      <div className="hotel-bottom">
+
+                        <div>
+                          <div className="stars-display">
+                            {'★'.repeat(hotel.categoria_estrelas)}
+                            <span>
+                              {'☆'.repeat(
+                                5 - hotel.categoria_estrelas
+                              )}
+                            </span>
+                          </div>
+
+                          <small>
+                            {hotel.categoria_estrelas} estrelas
+                          </small>
+                        </div>
+
+                        <div className="price">
+
+                          {preco ? (
+                            <>
+                              <strong>
+                                R$ {preco.toLocaleString('pt-BR', {
+                                  minimumFractionDigits: 2,
+                                })}
+                              </strong>
+
+                              <small>
+                                por noite
+                              </small>
+                            </>
+                          ) : (
+                            <small>
+                              Consulte disponibilidade
+                            </small>
+                          )}
+
+                        </div>
+
+                      </div>
+
+                    </div>
+
+                  </article>
+                )
+              })}
+
+            </div>
+          )}
+
+          {!loading && hoteis.length === 0 && (
+            <div className="empty-message">
+              Nenhum hotel encontrado para os filtros selecionados.
+            </div>
+          )}
+
+        </section>
+
+                {/* AVALIAÇÕES */}
+        <section className="reviews-section">
+          <div className="reviews-header">
+            <div className="reviews-icon">
+              💬
+            </div>
+
+            <div>
+              <h2>Avaliações de hóspedes</h2>
+              <p>
+                As experiências reais dos nossos hóspedes aparecerão aqui.
+              </p>
             </div>
           </div>
-        )}
 
-        <footer className="mt-5 py-4 border-top text-center text-muted">
-          <p className="mb-0">&copy; {new Date().getFullYear()} - Disciplina de Estágio II. Desenvolvido pela Equipe {data?.equipe || 'Alpha'}.</p>
-        </footer>
-      </div>
+          <div className="empty-reviews">
+            <div className="empty-reviews-icon">
+              ☆
+            </div>
+
+            <h3>Ainda não há avaliações</h3>
+
+            <p>
+              Seja o primeiro a avaliar uma hospedagem após sua estadia.
+            </p>
+          </div>
+        </section>
+
+      </main>
     </div>
   )
 }
+
+export default App

@@ -11,4 +11,4 @@ class CidadeCreate(CidadeBase):
 
 
 class CidadePublic(CidadeBase):
-    id: int
+    id: uuid.UUID
