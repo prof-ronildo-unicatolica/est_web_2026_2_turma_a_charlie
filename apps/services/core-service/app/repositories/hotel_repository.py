@@ -12,18 +12,13 @@ class CidadeRepository:
     def __init__(self, db: Session):
         self.db = db
 
-<<<<<<< HEAD
+
     def create(self, nome: str, estado: str) -> Cidade:
         cidade = Cidade(
             nome=nome,
             estado=estado,
-=======
-    def create(self, nome: str) -> Cidade:
-        cidade = Cidade(
-            nome=nome,
-            estado="CE",
->>>>>>> d5a7e051bf924278133566efd5661a8cd255273d
         )
+
         self.db.add(cidade)
         self.db.commit()
         self.db.refresh(cidade)
@@ -53,7 +48,7 @@ class HotelRepository:
     def __init__(self, db: Session):
         self.db = db
 
-<<<<<<< HEAD
+
     def create(
         self,
         nome: str,
@@ -65,19 +60,11 @@ class HotelRepository:
             nome=nome,
             cidade_id=cidade_id,
             categoria_estrelas=categoria_estrelas,
-        )
+            )
 
         if comodidades:
             hotel.comodidades = comodidades
 
-=======
-    def create(self, nome: str, cidade_id) -> Hotel:
-        hotel = Hotel(
-            nome=nome,
-            cidade_id=cidade_id,
-            categoria_estrelas=3,
-        )
->>>>>>> d5a7e051bf924278133566efd5661a8cd255273d
         self.db.add(hotel)
         self.db.commit()
         self.db.refresh(hotel)
