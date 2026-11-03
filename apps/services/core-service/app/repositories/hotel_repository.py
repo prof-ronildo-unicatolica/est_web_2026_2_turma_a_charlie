@@ -1,57 +1,109 @@
-from sqlalchemy.orm import Session
-from app.models.hotel import Cidade
+from typing import List
+
 from sqlalchemy.orm import Session, joinedload
+
+from app.models.comodidade import Comodidade
 from app.models.hotel import Cidade, Hotel
 
 
 class CidadeRepository:
-    """Acesso ao banco para Cidade. Sem regras de negócio ou HTTPException."""
+    """Acesso ao banco para Cidade. Sem regras de negocio ou HTTPException."""
 
     def __init__(self, db: Session):
         self.db = db
 
+<<<<<<< HEAD
+    def create(self, nome: str, estado: str) -> Cidade:
+        cidade = Cidade(
+            nome=nome,
+            estado=estado,
+=======
     def create(self, nome: str) -> Cidade:
-        cidade = Cidade(nome=nome)
+        cidade = Cidade(
+            nome=nome,
+            estado="CE",
+>>>>>>> d5a7e051bf924278133566efd5661a8cd255273d
+        )
         self.db.add(cidade)
         self.db.commit()
         self.db.refresh(cidade)
         return cidade
 
-    def list(self) -> list[Cidade]:
+    def list(self) -> List[Cidade]:
         return self.db.query(Cidade).order_by(Cidade.nome).all()
 
     def get_by_id(self, cidade_id) -> Cidade | None:
-        return self.db.query(Cidade).filter(Cidade.id == cidade_id).first()
+        return (
+            self.db.query(Cidade)
+            .filter(Cidade.id == cidade_id)
+            .first()
+        )
 
     def get_by_nome(self, nome: str) -> Cidade | None:
-        return self.db.query(Cidade).filter(Cidade.nome == nome).first()
+        return (
+            self.db.query(Cidade)
+            .filter(Cidade.nome == nome)
+            .first()
+        )
 
 
 class HotelRepository:
-    """Acesso ao banco para Hotel com carregamento ansioso (joinedload)."""
+    """Acesso ao banco para Hotel com carregamento ansioso."""
 
     def __init__(self, db: Session):
         self.db = db
 
+<<<<<<< HEAD
+    def create(
+        self,
+        nome: str,
+        cidade_id,
+        categoria_estrelas: int,
+        comodidades: List[Comodidade] | None = None,
+    ) -> Hotel:
+        hotel = Hotel(
+            nome=nome,
+            cidade_id=cidade_id,
+            categoria_estrelas=categoria_estrelas,
+        )
+
+        if comodidades:
+            hotel.comodidades = comodidades
+
+=======
     def create(self, nome: str, cidade_id) -> Hotel:
-        hotel = Hotel(nome=nome, cidade_id=cidade_id)
+        hotel = Hotel(
+            nome=nome,
+            cidade_id=cidade_id,
+            categoria_estrelas=3,
+        )
+>>>>>>> d5a7e051bf924278133566efd5661a8cd255273d
         self.db.add(hotel)
         self.db.commit()
         self.db.refresh(hotel)
+
         return hotel
 
-    def list(self) -> list[Hotel]:
+    def list(self) -> List[Hotel]:
         return (
             self.db.query(Hotel)
-            .options(joinedload(Hotel.cidade))
+            .options(
+                joinedload(Hotel.cidade),
+                joinedload(Hotel.quartos),
+                joinedload(Hotel.comodidades),
+            )
             .order_by(Hotel.nome)
             .all()
         )
 
-    def list_by_cidade(self, cidade_id) -> list[Hotel]:
+    def list_by_cidade(self, cidade_id) -> List[Hotel]:
         return (
             self.db.query(Hotel)
-            .options(joinedload(Hotel.cidade))
+            .options(
+                joinedload(Hotel.cidade),
+                joinedload(Hotel.quartos),
+                joinedload(Hotel.comodidades),
+            )
             .filter(Hotel.cidade_id == cidade_id)
             .order_by(Hotel.nome)
             .all()
@@ -60,7 +112,24 @@ class HotelRepository:
     def get_by_id(self, hotel_id) -> Hotel | None:
         return (
             self.db.query(Hotel)
-            .options(joinedload(Hotel.cidade))
+            .options(
+                joinedload(Hotel.cidade),
+                joinedload(Hotel.quartos),
+                joinedload(Hotel.comodidades),
+            )
             .filter(Hotel.id == hotel_id)
             .first()
+        )
+
+    def get_comodidades_by_ids(
+        self,
+        comodidade_ids: List[int],
+    ) -> List[Comodidade]:
+        if not comodidade_ids:
+            return []
+
+        return (
+            self.db.query(Comodidade)
+            .filter(Comodidade.id.in_(comodidade_ids))
+            .all()
         )

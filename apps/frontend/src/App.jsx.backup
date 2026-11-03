@@ -1,0 +1,279 @@
+import { useEffect, useState } from 'react'
+import './custom.css'
+
+export default function App() {
+  const [hoteis, setHoteis] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [erro, setErro] = useState(null)
+
+  useEffect(() => {
+    carregarHoteis()
+  }, [])
+
+  async function carregarHoteis() {
+    try {
+      setLoading(true)
+      setErro(null)
+
+      const response = await fetch(
+        'http://localhost:8000/api/v1/busca/hoteis'
+      )
+
+      if (!response.ok) {
+        throw new Error('Não foi possível carregar os hotéis.')
+      }
+
+      const data = await response.json()
+      setHoteis(data)
+    } catch (error) {
+      setErro(error.message)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="hotel-app">
+
+      {/* NAVBAR */}
+      <nav className="hotel-navbar">
+        <div className="hotel-container navbar-content">
+
+          <div className="logo">
+            <span className="logo-icon">🏨</span>
+            <span>Rede Hoteleira</span>
+          </div>
+
+          <div className="navbar-links">
+            <a href="#inicio">Início</a>
+            <a href="#hoteis">Hotéis</a>
+            <a href="#sobre">Sobre</a>
+          </div>
+
+          <div className="navbar-actions">
+            <button className="btn-login">
+              Entrar
+            </button>
+
+            <button className="btn-primary">
+              Criar conta
+            </button>
+          </div>
+
+        </div>
+      </nav>
+
+      {/* HERO */}
+      <section className="hero" id="inicio">
+        <div className="hotel-container hero-content">
+
+          <div className="hero-text">
+            <span className="hero-tag">
+              ✦ Encontre sua próxima hospedagem
+            </span>
+
+            <h1>
+              Encontre o hotel
+              <br />
+              ideal para sua viagem
+            </h1>
+
+            <p>
+              Pesquise hotéis, consulte quartos e encontre
+              a hospedagem perfeita para sua próxima viagem.
+            </p>
+          </div>
+
+          {/* BUSCA */}
+          <div className="search-box">
+
+            <div className="search-field">
+              <label>📍 Destino</label>
+              <input
+                type="text"
+                placeholder="Cidade ou destino"
+              />
+            </div>
+
+            <div className="search-field">
+              <label>📅 Check-in</label>
+              <input
+                type="date"
+              />
+            </div>
+
+            <div className="search-field">
+              <label>📅 Check-out</label>
+              <input
+                type="date"
+              />
+            </div>
+
+            <div className="search-field">
+              <label>👥 Hóspedes</label>
+              <select>
+                <option>2 hóspedes</option>
+                <option>1 hóspede</option>
+                <option>3 hóspedes</option>
+                <option>4 hóspedes</option>
+                <option>5+ hóspedes</option>
+              </select>
+            </div>
+
+            <button
+              className="search-button"
+              onClick={carregarHoteis}
+            >
+              🔍 Buscar
+            </button>
+
+          </div>
+
+        </div>
+      </section>
+
+      {/* HOTÉIS */}
+      <main className="hotel-container" id="hoteis">
+
+        <div className="section-header">
+          <div>
+            <span className="section-tag">
+              HOSPEDAGENS
+            </span>
+
+            <h2>Hotéis disponíveis</h2>
+
+            <p>
+              Encontre uma hospedagem que combina com você.
+            </p>
+          </div>
+
+          <button
+            className="refresh-button"
+            onClick={carregarHoteis}
+          >
+            ↻ Atualizar
+          </button>
+        </div>
+
+        {/* CARREGANDO */}
+        {loading && (
+          <div className="loading">
+            <div className="spinner"></div>
+            <p>Carregando hotéis...</p>
+          </div>
+        )}
+
+        {/* ERRO */}
+        {erro && (
+          <div className="error-message">
+            <strong>Não foi possível carregar os hotéis.</strong>
+            <p>{erro}</p>
+
+            <button
+              className="btn-primary"
+              onClick={carregarHoteis}
+            >
+              Tentar novamente
+            </button>
+          </div>
+        )}
+
+        {/* LISTA DE HOTÉIS */}
+        {!loading && !erro && (
+          <div className="hotel-grid">
+
+            {hoteis.map((hotel) => (
+              <article
+                className="hotel-card"
+                key={hotel.hotel_id}
+              >
+
+                <div className="hotel-image">
+                  🏨
+                </div>
+
+                <div className="hotel-card-content">
+
+                  <div className="hotel-rating">
+                    {'★'.repeat(hotel.categoria_estrelas)}
+                    <span>
+                      {hotel.categoria_estrelas} estrelas
+                    </span>
+                  </div>
+
+                  <h3>{hotel.nome}</h3>
+
+                  <p className="hotel-location">
+                    📍 {hotel.cidade_nome}, {hotel.cidade_estado}
+                  </p>
+
+                  <div className="hotel-divider"></div>
+
+                  <div className="hotel-info">
+
+                    <span>
+                      🛏️ {hotel.quartos?.length || 0} quartos
+                    </span>
+
+                    {hotel.quartos?.length > 0 && (
+                      <span>
+                        A partir de R$ {Math.min(
+                          ...hotel.quartos.map(
+                            (quarto) => quarto.preco_diaria
+                          )
+                        ).toFixed(2)}
+                      </span>
+                    )}
+
+                  </div>
+
+                  <button className="hotel-details-button">
+                    Ver detalhes →
+                  </button>
+
+                </div>
+
+              </article>
+            ))}
+
+          </div>
+        )}
+
+        {!loading && !erro && hoteis.length === 0 && (
+          <div className="empty-message">
+            <h3>Nenhum hotel encontrado</h3>
+            <p>
+              Não existem hotéis disponíveis para os filtros selecionados.
+            </p>
+          </div>
+        )}
+
+      </main>
+
+      {/* RODAPÉ */}
+      <footer className="hotel-footer" id="sobre">
+        <div className="hotel-container">
+
+          <div>
+            <div className="logo footer-logo">
+              <span className="logo-icon">🏨</span>
+              <span>Rede Hoteleira</span>
+            </div>
+
+            <p>
+              Encontre sua próxima hospedagem
+              de forma simples e rápida.
+            </p>
+          </div>
+
+          <div className="footer-copy">
+            © 2026 Rede Hoteleira — Estágio II
+          </div>
+
+        </div>
+      </footer>
+
+    </div>
+  )
+}

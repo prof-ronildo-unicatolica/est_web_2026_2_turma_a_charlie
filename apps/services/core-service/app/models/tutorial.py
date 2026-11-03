@@ -41,6 +41,21 @@ tecnologia_linguagem = Table(
     ),
 )
 
+hotel_comodidade = Table(
+    "hotel_comodidade",
+    Base.metadata,
+    Column(
+        "hotel_id",
+        ForeignKey("hoteis.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
+    Column(
+        "comodidade_id",
+        ForeignKey("comodidades.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
+)
+
 
 class Professor(Base):
     __tablename__ = "professores"
