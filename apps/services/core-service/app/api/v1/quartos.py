@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_admin
 from app.core.database import get_db, get_mongo_db
+from app.mensagens import QUARTO_NAO_ENCONTRADO
 from app.schemas.quarto import (
     QuartoCreateSchema,
     QuartoResponseSchema,
@@ -61,7 +62,7 @@ def buscar_quarto(
     if not quarto:
         raise HTTPException(
             status_code=404,
-            detail="Quarto não encontrado.",
+            detail=QUARTO_NAO_ENCONTRADO,
         )
 
     return quarto
@@ -84,7 +85,7 @@ async def atualizar_quarto(
     if not quarto:
         raise HTTPException(
             status_code=404,
-            detail="Quarto não encontrado.",
+            detail=QUARTO_NAO_ENCONTRADO,
         )
 
     return quarto
@@ -106,7 +107,7 @@ async def deletar_quarto(
     if not quarto:
         raise HTTPException(
             status_code=404,
-            detail="Quarto não encontrado.",
+            detail=QUARTO_NAO_ENCONTRADO,
         )
 
     return None
