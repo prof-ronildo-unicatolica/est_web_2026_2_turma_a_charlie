@@ -50,6 +50,22 @@ class HotelRepository:
     def __init__(self, db: Session):
         self.db = db
 
+    def create(
+        self,
+        nome: str,
+        cidade_id,
+        categoria_estrelas: int,
+        comodidades: List[Comodidade] | None = None,
+    ) -> Hotel:
+        hotel = Hotel(
+            nome=nome,
+            cidade_id=cidade_id,
+            categoria_estrelas=categoria_estrelas,
+        )
+
+        if comodidades:
+            hotel.comodidades = comodidades
+
     def create(self, nome: str, cidade_id) -> Hotel:
         hotel = Hotel(
             nome=nome,
