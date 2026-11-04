@@ -9,7 +9,7 @@ export default function HotelDetalhes({ hotel, onVoltar }) {
     <div className="hotel-details-page">
 
       {/* VOLTAR */}
-      <button
+      <button type="button"
         className="details-back-button"
         onClick={onVoltar}
       >
@@ -189,7 +189,7 @@ export default function HotelDetalhes({ hotel, onVoltar }) {
 
                   </div>
 
-                  <button className="reserve-button">
+                  <button type="button" className="reserve-button">
                     Reservar quarto
                   </button>
 
