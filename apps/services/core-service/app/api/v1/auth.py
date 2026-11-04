@@ -35,10 +35,10 @@ def register(
         )
 
     novo_usuario = Usuario(
-        nome=payload.nome,
-        email=payload.email,
-        senha_hash=hash_senha(payload.senha),
-        is_admin=payload.is_admin,
+    nome=payload.nome,
+    email=payload.email,
+    senha_hash=hash_senha(payload.senha),
+    is_admin=False,
     )
 
     db.add(novo_usuario)
