@@ -1,9 +1,4 @@
-"""Testes de fumaca do auth BASICO (placeholder).
-
-Documentam o contrato atual da API de autenticacao. Quando os alunos
-implementarem a versao real (JWT/RBAC) na Sprint 2, estes testes devem
-ser adaptados/substituidos pela suite definitiva da atividade.
-"""
+"""Testes básicos do contrato da API de autenticação."""
 
 BASE = "/api/v1/auth"
 
@@ -39,7 +34,7 @@ def test_rota_protegida_com_token_retorna_perfil(client):
     body = resp.json()
     assert body["email"] == "cliente@hotel.com"
     assert body["is_admin"] is False
-    assert "senha" not in body  # a senha nunca deve vazar na resposta
+    assert "senha" not in body
 
 
 def test_cliente_nao_acessa_rota_admin(client):
@@ -61,7 +56,8 @@ def test_admin_acessa_rota_admin(client):
     )
     assert resp.status_code == 200
 
-def test_cadastro_nao_permite_criar_administrador(client):
+
+def test_cadastro_publico_nao_concede_permissao_admin(client):
     dados = {
         "nome": "Usuario Teste",
         "email": "cadastro_seguro@exemplo.com",
@@ -69,6 +65,7 @@ def test_cadastro_nao_permite_criar_administrador(client):
         "is_admin": True,
     }
 
+    resposta = client.post(f"{BASE}/register", json=dados)
     resposta = client.post(
         "/api/v1/auth/register",
         json=dados,
@@ -78,6 +75,16 @@ def test_cadastro_nao_permite_criar_administrador(client):
     assert resposta.json()["is_admin"] is False
 
     login = client.post(
+        f"{BASE}/login",
+        json={"email": dados["email"], "senha": dados["senha"]},
+    )
+    assert login.status_code == 200
+
+    token = login.json()["access_token"]
+    acesso_admin = client.get(
+        f"{BASE}/admin/verificacao",
+        headers={"Authorization": f"Bearer {token}"},
+    )
         "/api/v1/auth/login",
         json={
             "email": dados["email"],
