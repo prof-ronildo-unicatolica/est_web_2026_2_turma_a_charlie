@@ -66,6 +66,10 @@ def test_cadastro_publico_nao_concede_permissao_admin(client):
     }
 
     resposta = client.post(f"{BASE}/register", json=dados)
+    resposta = client.post(
+        "/api/v1/auth/register",
+        json=dados,
+    )
 
     assert resposta.status_code == 201
     assert resposta.json()["is_admin"] is False
@@ -81,4 +85,20 @@ def test_cadastro_publico_nao_concede_permissao_admin(client):
         f"{BASE}/admin/verificacao",
         headers={"Authorization": f"Bearer {token}"},
     )
+        "/api/v1/auth/login",
+        json={
+            "email": dados["email"],
+            "senha": dados["senha"],
+        },
+    )
+
+    assert login.status_code == 200
+
+    token = login.json()["access_token"]
+
+    acesso_admin = client.get(
+        "/api/v1/auth/admin/verificacao",
+        headers={"Authorization": f"Bearer {token}"},
+    )
+
     assert acesso_admin.status_code == 403

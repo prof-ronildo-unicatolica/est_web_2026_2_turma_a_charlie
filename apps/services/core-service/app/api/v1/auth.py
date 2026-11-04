@@ -42,6 +42,10 @@ def register(
         email=payload.email,
         senha_hash=hash_senha(payload.senha),
         is_admin=False,
+    nome=payload.nome,
+    email=payload.email,
+    senha_hash=hash_senha(payload.senha),
+    is_admin=False,
     )
 
     db.add(novo_usuario)
