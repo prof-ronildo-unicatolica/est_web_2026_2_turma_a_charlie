@@ -141,7 +141,7 @@ function App() {
           <>
             <span>Olá, {usuarioLogado}</span>
 
-            <button
+            <button type="button"
               className="login-button"
               onClick={() => {
                 localStorage.removeItem('access_token')
@@ -155,7 +155,7 @@ function App() {
           <>
             <span>Olá, usuário</span>
 
-            <button
+            <button type="button"
               className="login-button"
               onClick={() => setTela('login')}
             >
@@ -281,7 +281,7 @@ function App() {
               </div>
             </div>
 
-            <button
+            <button type="button"
               className="search-button"
               onClick={pesquisar}
             >
@@ -297,7 +297,7 @@ function App() {
           <div className="section-heading">
             <h2>Sugestões para você</h2>
 
-            <button onClick={carregarHoteis}>
+            <button type="button" onClick={carregarHoteis}>
               Ver todas →
             </button>
           </div>
@@ -361,7 +361,7 @@ function App() {
                         alt={hotel.nome}
                       />
 
-                      <button className="favorite-button">
+                      <button type="button" className="favorite-button">
                         ♡
                       </button>
                     </div>
