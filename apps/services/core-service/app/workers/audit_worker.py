@@ -1,9 +1,12 @@
 import asyncio
 import json
 from datetime import datetime
+
 import aio_pika
 from motor.motor_asyncio import AsyncIOMotorClient
+
 from app.core.config import settings
+
 
 async def process_message(message: aio_pika.IncomingMessage):
     async with message.process():
@@ -23,7 +26,7 @@ async def process_message(message: aio_pika.IncomingMessage):
                 "timestamp": datetime.utcnow().isoformat()
             }
             await collection.insert_one(log_document)
-            print(f"[Worker] Log registrado com sucesso no MongoDB!")
+            print("[Worker] Log registrado com sucesso no MongoDB!")
 
         except Exception as e:
             print(f"[Worker] Erro ao processar mensagem: {str(e)}")

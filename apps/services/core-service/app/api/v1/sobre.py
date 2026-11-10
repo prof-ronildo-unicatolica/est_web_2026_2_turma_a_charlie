@@ -1,16 +1,14 @@
 import uuid
-from typing import Optional
 
-from fastapi import APIRouter, Depends, Header, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
 from app.schemas.tutorial import (
-    ProfessorBaseSchema,
-    ProfessorCreateSchema,
-    SobreResponseSchema,
     DisciplinaCreateSchema,
     DisciplinaResponseSimpleSchema,
+    ProfessorBaseSchema,
+    SobreResponseSchema,
 )
 from app.services.tutorial_service import TutorialService
 

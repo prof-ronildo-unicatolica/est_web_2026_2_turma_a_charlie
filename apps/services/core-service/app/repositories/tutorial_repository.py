@@ -1,5 +1,6 @@
 import uuid
 from typing import Any
+
 from sqlalchemy.orm import Session, joinedload
 
 from app.models.tutorial import (
