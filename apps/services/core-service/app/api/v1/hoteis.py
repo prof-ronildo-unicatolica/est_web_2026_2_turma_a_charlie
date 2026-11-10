@@ -5,10 +5,9 @@ from sqlalchemy.orm import Session
 
 from app.core.database import get_db, get_mongo_db
 from app.mensagens import HOTEL_NAO_ENCONTRADO
-from app.schemas.cidade import CidadeCreate, CidadePublic
+from app.models.hotel import Cidade
 from app.schemas.hotel import HotelCreateSchema, HotelResponseSchema
 from app.services.hotel_service import HotelService
-
 
 router = APIRouter(
     prefix="/hoteis",
@@ -21,7 +20,7 @@ router = APIRouter(
     response_model=HotelResponseSchema,
     status_code=status.HTTP_201_CREATED,
 )
-def criar_hotel(
+async def criar_hotel(
     payload: HotelCreateSchema,
     db: Session = Depends(get_db),
     mongo_db=Depends(get_mongo_db),
@@ -38,7 +37,7 @@ def criar_hotel(
             detail="Cidade não encontrada.",
         )
 
-    return service.create(payload)
+    return await service.create(payload)
 
 
 @router.get(

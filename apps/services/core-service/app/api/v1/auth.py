@@ -12,7 +12,6 @@ from app.core.security import criar_access_token, hash_senha
 from app.models.usuario import Usuario
 from app.schemas.usuario import LoginRequest, Token, UsuarioCreate, UsuarioPublic
 
-
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
 
@@ -42,10 +41,6 @@ def register(
         email=payload.email,
         senha_hash=hash_senha(payload.senha),
         is_admin=False,
-    nome=payload.nome,
-    email=payload.email,
-    senha_hash=hash_senha(payload.senha),
-    is_admin=False,
     )
 
     db.add(novo_usuario)

@@ -1,6 +1,9 @@
 import json
+
 import aio_pika
+
 from app.core.config import settings
+
 
 async def publish_event(queue_name: str, event_data: dict):
     """

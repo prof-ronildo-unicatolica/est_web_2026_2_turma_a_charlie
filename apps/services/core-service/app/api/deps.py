@@ -3,9 +3,9 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.core.database import get_db
 from app.core.security import decodificar_access_token, verificar_senha
 from app.models.usuario import Usuario
-from app.core.database import get_db
 
 bearer_scheme = HTTPBearer(
     description="Use o token retornado por POST /auth/login"
