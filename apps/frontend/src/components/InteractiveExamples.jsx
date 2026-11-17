@@ -132,6 +132,7 @@ export default function InteractiveExamples() {
                   <ul className="dropdown-menu w-100 shadow border-0" aria-labelledby="topicDropdown">
                     <li>
                       <button 
+                        type="button"
                         className={`dropdown-item py-2 ${selectedTopic === 'react' ? 'active' : ''}`}
                         onClick={() => setSelectedTopic('react')}
                       >
@@ -140,6 +141,7 @@ export default function InteractiveExamples() {
                     </li>
                     <li>
                       <button 
+                        type="button"
                         className={`dropdown-item py-2 ${selectedTopic === 'fastapi' ? 'active' : ''}`}
                         onClick={() => setSelectedTopic('fastapi')}
                       >
@@ -148,6 +150,7 @@ export default function InteractiveExamples() {
                     </li>
                     <li>
                       <button 
+                        type="button"
                         className={`dropdown-item py-2 ${selectedTopic === 'docker' ? 'active' : ''}`}
                         onClick={() => setSelectedTopic('docker')}
                       >
