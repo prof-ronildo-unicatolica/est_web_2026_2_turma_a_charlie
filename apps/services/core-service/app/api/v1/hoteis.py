@@ -1,9 +1,11 @@
+
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db, get_mongo_db
+from app.models.hotel import Cidade
 from app.mensagens import HOTEL_NAO_ENCONTRADO
 from app.models.hotel import Cidade
 from app.schemas.hotel import HotelCreateSchema, HotelResponseSchema
@@ -37,6 +39,13 @@ async def criar_hotel(
             detail="Cidade não encontrada.",
         )
 
+    try:
+        return await service.create(payload)
+    except ValueError as erro:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=str(erro),
+        ) from erro
     return await service.create(payload)
 
 
@@ -82,7 +91,7 @@ def obter_hotel(
 
     if not hotel:
         raise HTTPException(
-            status_code=404,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail=HOTEL_NAO_ENCONTRADO,
         )
 
