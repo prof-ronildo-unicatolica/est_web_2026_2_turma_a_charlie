@@ -7,9 +7,9 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db, get_mongo_db
 from app.models.hotel import Cidade
 from app.mensagens import HOTEL_NAO_ENCONTRADO
+from app.models.hotel import Cidade
 from app.schemas.hotel import HotelCreateSchema, HotelResponseSchema
 from app.services.hotel_service import HotelService
-
 
 router = APIRouter(
     prefix="/hoteis",
@@ -46,6 +46,7 @@ async def criar_hotel(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=str(erro),
         ) from erro
+    return await service.create(payload)
 
 
 @router.get(

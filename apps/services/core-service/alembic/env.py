@@ -6,12 +6,14 @@ from alembic import context
 
 # Importar modelos e configurações
 from app.core.config import settings
+from app.models import (
+    comodidade,  # noqa: F401
+    hotel,  # noqa: F401
+    servico_adicional,  # noqa: F401
+    tarifa_temporada,  # noqa: F401
+    usuario,  # noqa: F401
+)
 from app.models.tutorial import Base
-from app.models import hotel  # noqa: F401
-from app.models import usuario  # noqa: F401
-from app.models import servico_adicional  # noqa: F401
-from app.models import tarifa_temporada  # noqa: F401
-from app.models import comodidade  # noqa: F401
 
 # Objeto de configuração do Alembic
 config = context.config

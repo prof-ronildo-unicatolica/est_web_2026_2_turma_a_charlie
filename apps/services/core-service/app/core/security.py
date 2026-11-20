@@ -1,8 +1,7 @@
 from datetime import datetime, timedelta, timezone
 
-from passlib.context import CryptContext
 from jose import JWTError, jwt
-
+from passlib.context import CryptContext
 
 SECRET_KEY = "chave-secreta-do-projeto"
 ALGORITHM = "HS256"

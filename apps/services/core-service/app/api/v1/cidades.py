@@ -5,7 +5,6 @@ from app.core.database import get_db
 from app.schemas.cidade import CidadeCreate, CidadePublic
 from app.services.hotel_service import CidadeService
 
-
 router = APIRouter(
     prefix="/cidades",
     tags=["Cidades"],
