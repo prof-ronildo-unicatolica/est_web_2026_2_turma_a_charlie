@@ -1,7 +1,6 @@
-
 import uuid
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
 
 
 class CidadeBase(BaseModel):
