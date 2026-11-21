@@ -212,3 +212,33 @@ def test_excluir_quarto_inexistente(
     )
 
     assert resposta.status_code == 404
+
+def test_criar_quarto_com_erro_interno(
+    client,
+    simular_sincronizacao_mongo,
+    monkeypatch,
+):
+    async def falhar_ao_criar(self, payload):
+        raise RuntimeError("Erro simulado")
+
+    monkeypatch.setattr(
+        "app.api.v1.quartos.QuartoService.create",
+        falhar_ao_criar,
+    )
+
+    headers = obter_headers(client)
+
+    resposta = client.post(
+        "/api/v1/quartos",
+        json={
+            "hotel_id": "00000000-0000-0000-0000-000000000000",
+            "tipo": "Suíte",
+            "preco_diaria": "250.00",
+            "max_adultos": 2,
+            "max_criancas": 1,
+        },
+        headers=headers,
+    )
+
+    assert resposta.status_code == 400
+    assert resposta.json()["detail"] == "Não foi possível criar o quarto."
