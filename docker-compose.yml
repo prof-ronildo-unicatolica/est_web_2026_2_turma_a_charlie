@@ -70,6 +70,7 @@ services:
       - MONGO_ADMIN_PASSWORD=${MONGO_ADMIN_PASSWORD}
       - MONGODB_DB=hotel_mongo_dev
       - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
     ports:
       - "8000:8000"
     depends_on:
@@ -99,8 +100,10 @@ services:
       - POSTGRES_DB=hotel_db_dev
       - POSTGRES_PORT=5432
       - MONGODB_URL=${MONGODB_URL}
+      - MONGO_ADMIN_PASSWORD=${MONGO_ADMIN_PASSWORD}
       - MONGODB_DB=hotel_mongo_dev
       - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
     depends_on:
       postgres:
         condition: service_healthy
