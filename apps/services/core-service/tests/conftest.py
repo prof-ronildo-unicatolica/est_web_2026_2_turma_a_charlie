@@ -8,6 +8,7 @@ from app.core.security import hash_senha
 from app.main import app
 from app.models.tutorial import Base
 from app.models.usuario import Usuario
+from app.models.hotel import Cidade, Hotel, Quarto
 
 # Banco SQLite em arquivo temporario para os testes
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"

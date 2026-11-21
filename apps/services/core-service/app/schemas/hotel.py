@@ -1,3 +1,4 @@
+
 import uuid
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -22,3 +23,6 @@ class HotelResponseSchema(BaseModel):
 
     id: uuid.UUID
     nome: str
+    categoria_estrelas: int
+    cidade: CidadePublic
+    comodidades: list[ComodidadePublic]
