@@ -12,6 +12,7 @@ from app.models import (
     servico_adicional,  # noqa: F401
     tarifa_temporada,  # noqa: F401
     usuario,  # noqa: F401
+    reserva,  # noqa: F401
 )
 from app.models.tutorial import Base
 
