@@ -8,6 +8,7 @@ from fastapi.security import HTTPAuthorizationCredentials
 
 from app.api.deps import (
     autenticar_credenciais,
+    get_current_admin,
     get_current_user,
 )
 
@@ -93,9 +94,6 @@ def test_get_current_user_usuario_nao_encontrado():
             get_current_user(credentials, db)
 
     assert erro.value.status_code == 401
-
-
-from app.api.deps import get_current_admin
 
 
 def test_autenticar_credenciais_senha_correta():

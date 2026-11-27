@@ -1,10 +1,10 @@
 from uuid import UUID
+
+from app.models.comodidade import Comodidade
 from app.repositories.hotel_repository import (
     CidadeRepository,
     HotelRepository,
 )
-from app.models.hotel import Cidade
-from app.models.comodidade import Comodidade
 
 
 def test_criar_cidade_repository(db_session):

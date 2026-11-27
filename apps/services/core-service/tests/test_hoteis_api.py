@@ -2,6 +2,20 @@
 import pytest
 
 
+def obter_headers(client):
+    resposta = client.post(
+        "/api/v1/auth/login",
+        json={
+            "email": "admin@hotel.com",
+            "senha": "admin123",
+        },
+    )
+
+    assert resposta.status_code == 200
+
+    token = resposta.json()["access_token"]
+    return {"Authorization": f"Bearer {token}"}
+
 def criar_cidade(client):
     resposta = client.post(
         "/api/v1/cidades",
@@ -9,6 +23,7 @@ def criar_cidade(client):
             "nome": "Fortaleza",
             "estado": "CE",
         },
+        headers=obter_headers(client),
     )
 
     assert resposta.status_code == 201
@@ -35,6 +50,7 @@ def criar_hotel(client, cidade_id, comodidade_ids=None):
             "categoria_estrelas": 4,
             "comodidade_ids": comodidade_ids or [],
         },
+        headers=obter_headers(client),
     )
 
 
@@ -87,6 +103,7 @@ def test_criar_hotel_com_categoria_invalida(client):
             "categoria_estrelas": 8,
             "comodidade_ids": [],
         },
+        headers=obter_headers(client),
     )
 
     assert resposta.status_code == 422
