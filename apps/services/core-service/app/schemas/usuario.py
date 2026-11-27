@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class LoginRequest(BaseModel):
@@ -7,9 +7,9 @@ class LoginRequest(BaseModel):
 
 
 class UsuarioCreate(BaseModel):
-    nome: str
-    email: str
-    senha: str
+    nome: str = Field(min_length=2, max_length=100)
+    email: str = Field(min_length=5, max_length=100)
+    senha: str = Field(min_length=8, max_length=72)
 
 
 class Token(BaseModel):
