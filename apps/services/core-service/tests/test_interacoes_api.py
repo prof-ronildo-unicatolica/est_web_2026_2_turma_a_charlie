@@ -1,5 +1,6 @@
 from datetime import date, timedelta
 from decimal import Decimal
+from unittest.mock import AsyncMock
 
 from app.models.hotel import Cidade, Hotel, Quarto
 from app.models.interacao import Reserva
@@ -33,7 +34,8 @@ def token_cliente(client):
     return response.json()["access_token"]
 
 
-def test_criar_reserva_e_impedir_conflito(client, db_session):
+def test_criar_reserva_e_impedir_conflito(client, db_session, monkeypatch):
+    monkeypatch.setattr('app.api.v1.interacoes.registrar_evento', AsyncMock())
     _, quarto = criar_hotel_com_quarto(db_session)
     token = token_cliente(client)
     headers = {"Authorization": f"Bearer {token}"}
@@ -56,7 +58,8 @@ def test_criar_reserva_e_impedir_conflito(client, db_session):
     assert conflito.status_code == 409
 
 
-def test_favoritos_persistem_na_conta(client, db_session):
+def test_favoritos_persistem_na_conta(client, db_session, monkeypatch):
+    monkeypatch.setattr('app.api.v1.interacoes.registrar_evento', AsyncMock())
     hotel, _ = criar_hotel_com_quarto(db_session)
     headers = {"Authorization": f"Bearer {token_cliente(client)}"}
 
@@ -72,7 +75,8 @@ def test_favoritos_persistem_na_conta(client, db_session):
     assert remover.status_code == 204
 
 
-def test_avaliacao_exige_hospedagem_concluida(client, db_session):
+def test_avaliacao_exige_hospedagem_concluida(client, db_session, monkeypatch):
+    monkeypatch.setattr('app.api.v1.interacoes.registrar_evento', AsyncMock())
     hotel, quarto = criar_hotel_com_quarto(db_session)
     usuario = db_session.query(Usuario).filter_by(email="cliente@hotel.com").first()
     checkout = date.today() - timedelta(days=1)
