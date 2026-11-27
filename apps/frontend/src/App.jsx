@@ -55,7 +55,23 @@ function App() {
       })
       if (favoritosResponse.ok) {
         const dados = await favoritosResponse.json()
-        setFavoritos(dados.map(item => item.hotel_id))
+        const remotos = dados.map(item => item.hotel_id)
+        let locais = []
+        try {
+          const salvos = JSON.parse(localStorage.getItem('hotel_favoritos') || '[]')
+          if (Array.isArray(salvos)) locais = salvos.filter(id => typeof id === 'string')
+        } catch {
+          locais = []
+        }
+        for (const hotelId of locais) {
+          if (remotos.includes(hotelId)) continue
+          const sync = await fetch(`${API_URL}/api/v1/favoritos/${hotelId}`, {
+            method: 'PUT',
+            headers: { Authorization: `Bearer ${token}` },
+          })
+          if (sync.ok) remotos.push(hotelId)
+        }
+        setFavoritos([...new Set(remotos)])
       }
     } catch {
       localStorage.removeItem('access_token')
