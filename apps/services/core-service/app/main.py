@@ -9,8 +9,8 @@ from app.api.v1.busca import router as busca_router
 from app.api.v1.cidades import router as cidades_router
 from app.api.v1.comodidades import router as comodidades_router
 from app.api.v1.health import router as health_router
-from app.api.v1.interacoes import router as interacoes_router
 from app.api.v1.hoteis import router as hoteis_router
+from app.api.v1.interacoes import router as interacoes_router
 from app.api.v1.quartos import router as quartos_router
 from app.api.v1.sobre import router as sobre_router
 from app.core.config import settings
