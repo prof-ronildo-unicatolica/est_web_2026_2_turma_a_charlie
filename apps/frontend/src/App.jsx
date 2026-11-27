@@ -1,15 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import './custom.css'
 import Login from './components/Login'
+import Cadastro from './components/Cadastro'
 import HotelDetalhes from './components/HotelDetalhes'
 
 const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/$/, '')
 
 function App() {
   const [tela, setTela] = useState('home')
-  const [usuarioLogado, setUsuarioLogado] = useState(
-  localStorage.getItem('access_token')
-)
+  const [usuarioLogado, setUsuarioLogado] = useState(null)
   const [hotelSelecionado, setHotelSelecionado] = useState(null)
   const [hoteis, setHoteis] = useState([])
   const [cidades, setCidades] = useState([])
@@ -36,7 +35,31 @@ function App() {
   useEffect(() => {
     carregarHoteis()
     carregarCidades()
+    validarSessao()
   }, [])
+
+  async function validarSessao() {
+    const token = localStorage.getItem('access_token')
+    if (!token) return
+    try {
+      const response = await fetch(`${API_URL}/api/v1/auth/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (!response.ok) throw new Error('Sessão expirada')
+      const usuario = await response.json()
+      setUsuarioLogado(usuario)
+      const favoritosResponse = await fetch(`${API_URL}/api/v1/favoritos`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (favoritosResponse.ok) {
+        const dados = await favoritosResponse.json()
+        setFavoritos(dados.map(item => item.hotel_id))
+      }
+    } catch {
+      localStorage.removeItem('access_token')
+      setUsuarioLogado(null)
+    }
+  }
 
   async function carregarCidades() {
     try {
@@ -55,12 +78,22 @@ function App() {
     localStorage.setItem('hotel_favoritos', JSON.stringify(favoritos))
   }, [favoritos])
 
-  function alternarFavorito(hotelId) {
-    setFavoritos((atuais) =>
-      atuais.includes(hotelId)
-        ? atuais.filter((id) => id !== hotelId)
-        : [...atuais, hotelId]
-    )
+  async function alternarFavorito(hotelId) {
+    const token = localStorage.getItem('access_token')
+    const jaFavorito = favoritos.includes(hotelId)
+    if (token) {
+      try {
+        const response = await fetch(`${API_URL}/api/v1/favoritos/${hotelId}`, {
+          method: jaFavorito ? 'DELETE' : 'PUT',
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        if (!response.ok) throw new Error('Não foi possível atualizar o favorito.')
+      } catch (error) {
+        setErro(error.message)
+        return
+      }
+    }
+    setFavoritos(atuais => jaFavorito ? atuais.filter(id => id !== hotelId) : [...atuais, hotelId])
   }
 
   async function carregarHoteis() {
@@ -131,16 +164,19 @@ function App() {
   }
 
   if (tela === 'login') {
-  return (
-    <Login
-      onVoltar={() => setTela('home')}
-      onLogin={() => {
-        setUsuarioLogado(true)
-        setTela('home')
-      }}
-    />
-  )
-}
+    return <Login onVoltar={() => setTela('home')} onIrCadastro={() => setTela('cadastro')} onLogin={async () => { await validarSessao(); setTela('home') }} />
+  }
+
+  if (tela === 'cadastro') {
+    return <Cadastro onVoltar={() => setTela('login')} onCadastro={async (email, senha) => {
+      const response = await fetch(`${API_URL}/api/v1/auth/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, senha }) })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.detail || 'Conta criada, mas não foi possível entrar.')
+      localStorage.setItem('access_token', data.access_token)
+      await validarSessao()
+      setTela('home')
+    }} />
+  }
 
   if (tela === 'detalhes' && hotelSelecionado) {
     return (
@@ -185,7 +221,7 @@ function App() {
 
         {usuarioLogado ? (
           <>
-            <span>Olá, usuário</span>
+            <span>Olá, {usuarioLogado.nome || 'usuário'}</span>
 
             <button type="button"
               className="login-button"
