@@ -22,3 +22,5 @@ class HotelBuscaFiltros(BaseModel):
         ge=1,
         le=5,
     )
+    adultos: int = Field(default=1, ge=1, le=20)
+    criancas: int = Field(default=0, ge=0, le=20)
