@@ -79,7 +79,7 @@ for ($i = 0; $i -lt 30; $i++) {
 }
 if (-not $healthy) { throw "MongoDB não ficou healthy. Consulte: docker compose logs mongodb" }
 
-docker compose up -d --build core-service audit-worker
+docker compose up -d --build
 if ($LASTEXITCODE -ne 0) { throw "Falha ao reconstruir API e worker." }
 
 Write-Host ""
