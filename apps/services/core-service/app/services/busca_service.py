@@ -12,9 +12,9 @@ from app.repositories.catalogo_repository import CatalogoRepository
 class BuscaService:
     """Regras de negócio da busca pública de hotéis."""
 
-    def __init__(self, mongo_db: AsyncIOMotorDatabase, db: Session):
-        self.repository = CatalogoRepository(mongo_db)
-        self.db = db
+    def __init__(self, db, sql_db: Session | None = None):
+        self.repository = CatalogoRepository(db)
+        self.db = sql_db
 
     async def buscar_hoteis(
         self,
@@ -31,13 +31,14 @@ class BuscaService:
         if estrelas is not None:
             filtros["categoria_estrelas"] = estrelas
 
-        capacidade = {"max_adultos": {"$gte": adultos}}
-        if criancas > 0:
-            capacidade["max_criancas"] = {"$gte": criancas}
-        filtros["quartos"] = {"$elemMatch": capacidade}
+        if adultos > 1 or criancas > 0:
+            capacidade = {"max_adultos": {"$gte": adultos}}
+            if criancas > 0:
+                capacidade["max_criancas"] = {"$gte": criancas}
+            filtros["quartos"] = {"$elemMatch": capacidade}
 
         hoteis = await self.repository.buscar(filtros)
-        if not checkin or not checkout:
+        if not checkin or not checkout or self.db is None:
             return hoteis
 
         quartos_ids = [
