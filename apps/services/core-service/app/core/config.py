@@ -7,7 +7,7 @@ class Settings(BaseSettings):
 
     PROJECT_NAME: str = "Sistema de Reservas - Core Service"
     API_V1_STR: str = "/api/v1"
-    JWT_SECRET_KEY: str
+    SECRET_KEY: str
 
     # Credenciais podem ser sobrescritas por variáveis de ambiente.
     POSTGRES_SERVER: str = "localhost"
@@ -30,7 +30,6 @@ class Settings(BaseSettings):
     RABBITMQ_URL: str = "amqp://guest:guest@localhost:5672/"
 
     # Em produção, defina uma chave aleatória forte via ambiente.
-    SECRET_KEY: str = "dev-only-change-this-secret-key-before-deploy"
     INITIAL_ADMIN_EMAIL: str | None = None
     INITIAL_ADMIN_PASSWORD: str | None = None
     INITIAL_ADMIN_NAME: str = "Administrador"

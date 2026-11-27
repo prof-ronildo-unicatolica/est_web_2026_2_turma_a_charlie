@@ -18,12 +18,15 @@ def obter_headers(client):
 
 
 def preparar_hotel(client):
+    headers = obter_headers(client)
+
     cidade = client.post(
         "/api/v1/cidades",
         json={
             "nome": "Fortaleza",
             "estado": "CE",
         },
+        headers=headers,
     )
 
     assert cidade.status_code == 201
@@ -36,11 +39,11 @@ def preparar_hotel(client):
             "categoria_estrelas": 4,
             "comodidade_ids": [],
         },
+        headers=headers,
     )
 
     assert hotel.status_code == 201
     return hotel.json()
-
 
 @pytest.fixture
 def simular_sincronizacao_mongo(monkeypatch):

@@ -45,7 +45,7 @@ def test_token_jwt_expirado():
 
     token_expirado = jwt.encode(
         payload,
-        settings.JWT_SECRET_KEY,
+        settings.SECRET_KEY,
         algorithm="HS256",
     )
 

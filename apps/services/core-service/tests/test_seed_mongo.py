@@ -70,4 +70,5 @@ async def test_registra_erro_quando_falha_no_seed(caplog):
 
     await seed_mongo_users(db)
 
-    assert "Error seeding MongoDB: Erro de conexão" in caplog.text
+    assert "MongoDB seed falhou" in caplog.text
+    assert "Erro de conexão" in caplog.text
