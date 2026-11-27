@@ -34,6 +34,7 @@ function App() {
   const [adultos, setAdultos] = useState(2)
   const [criancas, setCriancas] = useState(0)
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     carregarHoteis()
     carregarCidades()
