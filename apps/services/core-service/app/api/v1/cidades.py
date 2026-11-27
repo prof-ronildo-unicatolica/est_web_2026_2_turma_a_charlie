@@ -1,4 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
+
+from app.api.deps import get_current_admin
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -19,6 +21,7 @@ router = APIRouter(
 def criar_cidade(
     payload: CidadeCreate,
     db: Session = Depends(get_db),
+    _admin=Depends(get_current_admin),
 ):
     service = CidadeService(db)
 
