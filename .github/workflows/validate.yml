@@ -45,5 +45,7 @@ jobs:
           python-version: "3.11"
       - uses: snok/install-poetry@v1
       - run: poetry install --no-interaction
+      - run: poetry run ruff check --fix app/api/v1/interacoes.py app/api/v1/busca.py app/models/interacao.py app/services/busca_service.py app/services/audit_service.py app/core/seed_admin.py app/core/seed_mongo.py app/main.py
+      - run: git diff -- app/main.py app/models/interacao.py
       - run: poetry run ruff check app/api/v1/interacoes.py app/api/v1/busca.py app/models/interacao.py app/services/busca_service.py app/services/audit_service.py app/core/seed_admin.py app/core/seed_mongo.py app/main.py
       - run: poetry run pytest -q
