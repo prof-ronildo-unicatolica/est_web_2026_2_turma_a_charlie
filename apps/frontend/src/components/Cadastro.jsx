@@ -33,7 +33,7 @@ export default function Cadastro({ onVoltar, onCadastro }) {
       })
       const data = await response.json()
       if (!response.ok) throw new Error(data.detail || 'Não foi possível criar a conta.')
-      onCadastro(email.trim(), senha)
+      await onCadastro(email.trim(), senha)
     } catch (error) {
       setErro(error.message)
     } finally {
