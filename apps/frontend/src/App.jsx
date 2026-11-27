@@ -139,6 +139,10 @@ function App() {
 
       params.append('adultos', String(adultos))
       params.append('criancas', String(criancas))
+      if (checkin && checkout) {
+        params.append('checkin', checkin)
+        params.append('checkout', checkout)
+      }
 
       const url = `${API_URL}/api/v1/busca/hoteis${
         params.toString() ? `?${params.toString()}` : ''
