@@ -4,7 +4,6 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_admin
-
 from app.core.database import get_db
 from app.models.hotel import Cidade, Hotel
 from app.schemas.cidade import CidadeCreate, CidadePublic, CidadeUpdate
