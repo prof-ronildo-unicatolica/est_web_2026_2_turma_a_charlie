@@ -62,6 +62,53 @@ export default function AdminPanel({ token, onVoltar }) {
     } catch (error) { setMensagem(error.message) }
   }
 
+  async function editarCidade(item) {
+    const nome = window.prompt('Nome da cidade:', item.nome)
+    if (nome === null) return
+    const estado = window.prompt('UF:', item.estado)
+    if (estado === null) return
+    try {
+      await requisitar(`/cidades/${item.id}`, { method: 'PATCH', body: JSON.stringify({ nome, estado }) })
+      await carregar()
+      setMensagem('Cidade atualizada.')
+    } catch (error) { setMensagem(error.message) }
+  }
+
+  async function excluirCidade(id) {
+    if (!window.confirm('Excluir esta cidade? Só é permitido quando não há hotéis vinculados.')) return
+    try {
+      await requisitar(`/cidades/${id}`, { method: 'DELETE' })
+      await carregar()
+      setMensagem('Cidade excluída.')
+    } catch (error) { setMensagem(error.message) }
+  }
+
+  async function editarHotel(item) {
+    const nome = window.prompt('Nome do hotel:', item.nome)
+    if (nome === null) return
+    const estrelas = window.prompt('Classificação (1 a 5):', '3')
+    if (estrelas === null) return
+    const categoria_estrelas = Number(estrelas)
+    if (!Number.isInteger(categoria_estrelas) || categoria_estrelas < 1 || categoria_estrelas > 5) {
+      setMensagem('A classificação deve ser um número entre 1 e 5.')
+      return
+    }
+    try {
+      await requisitar(`/hoteis/${item.id}`, { method: 'PATCH', body: JSON.stringify({ nome, categoria_estrelas }) })
+      await carregar()
+      setMensagem('Hotel atualizado.')
+    } catch (error) { setMensagem(error.message) }
+  }
+
+  async function excluirHotel(id) {
+    if (!window.confirm('Excluir este hotel? A operação é bloqueada se houver reservas vinculadas.')) return
+    try {
+      await requisitar(`/hoteis/${id}`, { method: 'DELETE' })
+      await carregar()
+      setMensagem('Hotel excluído.')
+    } catch (error) { setMensagem(error.message) }
+  }
+
   async function excluirQuarto(id) {
     if (!window.confirm('Deseja realmente excluir este quarto?')) return
     try {
@@ -95,7 +142,7 @@ export default function AdminPanel({ token, onVoltar }) {
           <label>UF<input required minLength={2} maxLength={2} value={cidade.estado} onChange={e => setCidade({ ...cidade, estado: e.target.value.toUpperCase() })} /></label>
           <button type="submit">Cadastrar cidade</button>
         </form>
-        <ul>{cidades.map(item => <li key={item.id}>{item.nome} - {item.estado}</li>)}</ul>
+        <ul>{cidades.map(item => <li key={item.id}>{item.nome} - {item.estado} <button type="button" onClick={() => editarCidade(item)}>Editar</button> <button type="button" onClick={() => excluirCidade(item.id)}>Excluir</button></li>)}</ul>
       </section>
 
       <section className="admin-section">
@@ -106,7 +153,7 @@ export default function AdminPanel({ token, onVoltar }) {
           <label>Estrelas<select value={hotel.categoria_estrelas} onChange={e => setHotel({ ...hotel, categoria_estrelas: e.target.value })}>{[1,2,3,4,5].map(n => <option key={n}>{n}</option>)}</select></label>
           <button type="submit" disabled={!cidades.length}>Cadastrar hotel</button>
         </form>
-        <ul>{hoteis.map(item => <li key={item.id}>{item.nome}</li>)}</ul>
+        <ul>{hoteis.map(item => <li key={item.id}>{item.nome} <button type="button" onClick={() => editarHotel(item)}>Editar</button> <button type="button" onClick={() => excluirHotel(item.id)}>Excluir</button></li>)}</ul>
       </section>
 
       <section className="admin-section">
