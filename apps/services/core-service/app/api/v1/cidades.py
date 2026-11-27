@@ -70,8 +70,8 @@ def atualizar_cidade(
         raise HTTPException(status_code=404, detail="Cidade não encontrada.")
 
     dados = payload.model_dump(exclude_unset=True)
-    if not dados:
-        raise HTTPException(status_code=422, detail="Informe ao menos um campo.")
+    if not dados or any(valor is None for valor in dados.values()):
+        raise HTTPException(status_code=422, detail="Informe campos válidos para atualização.")
 
     if "nome" in dados:
         nome = dados["nome"].strip()
