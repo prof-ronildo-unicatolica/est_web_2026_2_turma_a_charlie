@@ -104,6 +104,9 @@ function App() {
         params.append('estrelas', estrelas)
       }
 
+      params.append('adultos', String(adultos))
+      params.append('criancas', String(criancas))
+
       const url = `${API_URL}/api/v1/busca/hoteis${
         params.toString() ? `?${params.toString()}` : ''
       }`
