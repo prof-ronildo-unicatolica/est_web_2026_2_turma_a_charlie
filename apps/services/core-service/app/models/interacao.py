@@ -20,7 +20,7 @@ class Reserva(Base):
     hotel_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("hoteis.id", ondelete="CASCADE"), nullable=False, index=True)
     quarto_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("quartos.id", ondelete="CASCADE"), nullable=False, index=True)
     data_checkin: Mapped[date] = mapped_column(Date, nullable=False)
-    data_checkout: Mapped[datetime.date] = mapped_column(Date, nullable=False)
+    data_checkout: Mapped[date] = mapped_column(Date, nullable=False)
     adultos: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     criancas: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
     status: Mapped[str] = mapped_column(String(20), nullable=False, default="confirmada")
