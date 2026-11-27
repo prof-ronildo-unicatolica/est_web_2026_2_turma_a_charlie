@@ -12,6 +12,7 @@ from app.core.database import get_db
 from app.models.hotel import Hotel, Quarto
 from app.models.interacao import Avaliacao, Favorito, Reserva
 from app.models.usuario import Usuario
+from app.services.audit_service import registrar_evento
 
 router = APIRouter(tags=["Reservas, avaliações e favoritos"])
 
@@ -60,7 +61,7 @@ class FavoritoPublic(BaseModel):
 
 
 @router.post("/reservas", response_model=ReservaPublic, status_code=status.HTTP_201_CREATED)
-def criar_reserva(
+async def criar_reserva(
     payload: ReservaCreate,
     db: Session = Depends(get_db),
     usuario: Usuario = Depends(get_current_user),
@@ -106,6 +107,7 @@ def criar_reserva(
     db.add(reserva)
     db.commit()
     db.refresh(reserva)
+    await registrar_evento('reserva_criada', 'reserva', str(reserva.id), str(usuario.id), {'status': reserva.status, 'valor_total': reserva.valor_total})
     return reserva
 
 
@@ -118,7 +120,7 @@ def listar_todas_reservas(
 
 
 @router.patch("/reservas/{reserva_id}/confirmar", response_model=ReservaPublic)
-def confirmar_reserva(
+async def confirmar_reserva(
     reserva_id: uuid.UUID,
     db: Session = Depends(get_db),
     _admin: Usuario = Depends(get_current_admin),
@@ -140,6 +142,7 @@ def confirmar_reserva(
     reserva.status = 'confirmada'
     db.commit()
     db.refresh(reserva)
+    await registrar_evento('reserva_confirmada', 'reserva', str(reserva.id), str(_admin.id))
     return reserva
 
 
@@ -152,7 +155,7 @@ def listar_minhas_reservas(
 
 
 @router.patch("/reservas/{reserva_id}/cancelar", response_model=ReservaPublic)
-def cancelar_reserva(
+async def cancelar_reserva(
     reserva_id: uuid.UUID,
     db: Session = Depends(get_db),
     usuario: Usuario = Depends(get_current_user),
@@ -170,6 +173,7 @@ def cancelar_reserva(
     reserva.status = "cancelada"
     db.commit()
     db.refresh(reserva)
+    await registrar_evento('reserva_cancelada', 'reserva', str(reserva.id), str(usuario.id))
     return reserva
 
 
@@ -179,7 +183,7 @@ def listar_avaliacoes(hotel_id: uuid.UUID, db: Session = Depends(get_db)):
 
 
 @router.post("/avaliacoes", response_model=AvaliacaoPublic, status_code=status.HTTP_201_CREATED)
-def criar_avaliacao(
+async def criar_avaliacao(
     payload: AvaliacaoCreate,
     db: Session = Depends(get_db),
     usuario: Usuario = Depends(get_current_user),
@@ -210,6 +214,7 @@ def criar_avaliacao(
     db.add(avaliacao)
     db.commit()
     db.refresh(avaliacao)
+    await registrar_evento('avaliacao_criada', 'avaliacao', str(avaliacao.id), str(usuario.id), {'hotel_id': str(payload.hotel_id), 'nota': payload.nota})
     return avaliacao
 
 
@@ -222,7 +227,7 @@ def listar_favoritos(
 
 
 @router.put("/favoritos/{hotel_id}", response_model=FavoritoPublic)
-def adicionar_favorito(
+async def adicionar_favorito(
     hotel_id: uuid.UUID,
     db: Session = Depends(get_db),
     usuario: Usuario = Depends(get_current_user),
@@ -238,11 +243,12 @@ def adicionar_favorito(
         db.add(favorito)
         db.commit()
         db.refresh(favorito)
+        await registrar_evento('favorito_adicionado', 'favorito', str(favorito.id), str(usuario.id), {'hotel_id': str(hotel_id)})
     return favorito
 
 
 @router.delete("/favoritos/{hotel_id}", status_code=status.HTTP_204_NO_CONTENT)
-def remover_favorito(
+async def remover_favorito(
     hotel_id: uuid.UUID,
     db: Session = Depends(get_db),
     usuario: Usuario = Depends(get_current_user),
@@ -252,6 +258,8 @@ def remover_favorito(
         Favorito.hotel_id == hotel_id,
     ).first()
     if favorito:
+        favorito_id = str(favorito.id)
         db.delete(favorito)
         db.commit()
+        await registrar_evento('favorito_removido', 'favorito', favorito_id, str(usuario.id), {'hotel_id': str(hotel_id)})
     return None
