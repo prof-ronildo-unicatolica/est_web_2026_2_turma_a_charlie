@@ -135,6 +135,11 @@ async def atualizar_hotel(
     if not dados or any(valor is None for campo, valor in dados.items() if campo != "comodidade_ids"):
         raise HTTPException(status_code=422, detail="Informe campos válidos para atualização.")
 
+    if "nome" in dados:
+        dados["nome"] = dados["nome"].strip()
+        if not dados["nome"]:
+            raise HTTPException(status_code=422, detail="O nome do hotel não pode ser vazio.")
+
     if "cidade_id" in dados:
         cidade = db.query(Cidade).filter(Cidade.id == dados["cidade_id"]).first()
         if not cidade:
