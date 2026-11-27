@@ -2,7 +2,7 @@ import { useRef, useState } from 'react'
 
 const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/$/, '')
 
-export default function Login({ onVoltar, onLogin }) {
+export default function Login({ onVoltar, onLogin, onIrCadastro }) {
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
   const [erro, setErro] = useState('')
@@ -102,6 +102,9 @@ export default function Login({ onVoltar, onLogin }) {
 
         </form>
 
+        <button type="button" className="login-back" onClick={onIrCadastro}>
+          Ainda não tem conta? Cadastre-se
+        </button>
         <button
           type="button"
           className="login-back"
