@@ -1,3 +1,4 @@
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -20,18 +21,23 @@ from app.core.database import SessionLocal
 from app.models.hotel import Hotel
 from app.services.catalogo_sync_service import CatalogoSyncService
 
+logger = logging.getLogger(__name__)
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     seed_initial_admin()
     mongo_db = get_mongo_db()
-    await mongo_db.command('ping')
-    await seed_mongo_users(mongo_db)
-    with SessionLocal() as db:
-        hotel_ids = [item[0] for item in db.query(Hotel.id).all()]
-        catalogo = CatalogoSyncService(db, mongo_db)
-        for hotel_id in hotel_ids:
-            await catalogo.sincronizar_hotel(hotel_id)
+    try:
+        await mongo_db.command('ping')
+        await seed_mongo_users(mongo_db)
+        with SessionLocal() as db:
+            hotel_ids = [item[0] for item in db.query(Hotel.id).all()]
+            catalogo = CatalogoSyncService(db, mongo_db)
+            for hotel_id in hotel_ids:
+                await catalogo.sincronizar_hotel(hotel_id)
+    except Exception:
+        logger.exception('MongoDB indisponível: catálogo e seed não foram sincronizados.')
     yield
 
 
