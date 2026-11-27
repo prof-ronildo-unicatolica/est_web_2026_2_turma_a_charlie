@@ -105,6 +105,14 @@ def criar_reserva(
     return reserva
 
 
+@router.get("/reservas/admin/todas", response_model=list[ReservaPublic])
+def listar_todas_reservas(
+    db: Session = Depends(get_db),
+    _admin: Usuario = Depends(get_current_admin),
+):
+    return db.query(Reserva).order_by(Reserva.criada_em.desc()).all()
+
+
 @router.patch("/reservas/{reserva_id}/confirmar", response_model=ReservaPublic)
 def confirmar_reserva(
     reserva_id: uuid.UUID,
