@@ -25,7 +25,7 @@ async def registrar_evento(
         "ocorrido_em": datetime.now(timezone.utc).isoformat(),
     }
     try:
-        connection = await aio_pika.connect_robust(settings.RABBITMQ_URL)
+        connection = await aio_pika.connect_robust(settings.RABBITMQ_URL, timeout=2)
         async with connection:
             channel = await connection.channel()
             queue = await channel.declare_queue("audit.logs", durable=True)
