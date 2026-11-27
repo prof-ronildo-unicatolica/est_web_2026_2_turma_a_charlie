@@ -1,10 +1,9 @@
 import uuid
-from datetime import date
+from datetime import date, datetime
 from decimal import Decimal
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, ConfigDict, Field
-from sqlalchemy import and_, or_
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_user
@@ -50,7 +49,7 @@ class AvaliacaoPublic(BaseModel):
     hotel_id: uuid.UUID
     nota: int
     comentario: str
-    criada_em: object
+    criada_em: datetime
 
 
 class FavoritoPublic(BaseModel):
