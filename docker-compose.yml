@@ -26,7 +26,7 @@ services:
     restart: unless-stopped
     environment:
       - MONGO_INITDB_ROOT_USERNAME=admin
-      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ADMIN_PASSWORD:?Defina MONGO_ADMIN_PASSWORD no arquivo .env}
     ports:
       - "27017:27017"
     volumes:
@@ -62,13 +62,15 @@ services:
     restart: unless-stopped
     environment:
       - POSTGRES_SERVER=postgres
-      - POSTGRES_USER=postgres
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD no arquivo .env}
-      - POSTGRES_DB=hotel_db_dev
+      - POSTGRES_DB=${POSTGRES_DB:-hotel_db_dev}
       - POSTGRES_PORT=5432
       - MONGODB_URL=${MONGODB_URL:?Defina MONGODB_URL no arquivo .env}
       - MONGO_ADMIN_PASSWORD=${MONGO_ADMIN_PASSWORD:?Defina MONGO_ADMIN_PASSWORD no arquivo .env}
       - MONGODB_DB=hotel_mongo_dev
+      - SECRET_KEY=${SECRET_KEY:?Defina SECRET_KEY no arquivo .env}
+      - BACKEND_CORS_ORIGINS=${BACKEND_CORS_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173}
       - RABBITMQ_URL=amqp://${RABBITMQ_USER:-hotel_app}:${RABBITMQ_PASSWORD:?Defina RABBITMQ_PASSWORD no arquivo .env}@rabbitmq:5672/
     ports:
       - "8000:8000"
@@ -94,12 +96,13 @@ services:
     restart: unless-stopped
     environment:
       - POSTGRES_SERVER=postgres
-      - POSTGRES_USER=postgres
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD no arquivo .env}
-      - POSTGRES_DB=hotel_db_dev
+      - POSTGRES_DB=${POSTGRES_DB:-hotel_db_dev}
       - POSTGRES_PORT=5432
-      - MONGODB_URL=${MONGODB_URL}
+      - MONGODB_URL=${MONGODB_URL:?Defina MONGODB_URL no arquivo .env}
       - MONGODB_DB=hotel_mongo_dev
+      - SECRET_KEY=${SECRET_KEY:?Defina SECRET_KEY no arquivo .env}
       - RABBITMQ_URL=amqp://${RABBITMQ_USER:-hotel_app}:${RABBITMQ_PASSWORD:?Defina RABBITMQ_PASSWORD no arquivo .env}@rabbitmq:5672/
     depends_on:
       postgres:
