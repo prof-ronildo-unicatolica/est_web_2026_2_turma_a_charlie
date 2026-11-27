@@ -1185,3 +1185,79 @@ body {
     gap: 20px;
   }
 }
+
+/* Ações dos cartões e favoritos */
+.hotel-open-button {
+  display: block;
+  width: calc(100% - 40px);
+  margin: 0 20px 20px;
+  padding: 12px 16px;
+  border: 1px solid #e8bd58;
+  border-radius: 10px;
+  background: #fff7e7;
+  color: #3d2414;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.hotel-open-button:hover {
+  background: #f6e5bd;
+}
+
+.favorite-button[aria-pressed="true"] {
+  color: #b42318;
+}
+
+.favorite-button:focus-visible,
+.hotel-open-button:focus-visible,
+.hotel-nav a:focus-visible,
+.search-button:focus-visible,
+.section-heading button:focus-visible {
+  outline: 3px solid #b87912;
+  outline-offset: 3px;
+}
+
+.favorites-section {
+  padding: 30px 6% 60px;
+  scroll-margin-top: 24px;
+}
+
+.favorites-list {
+  display: grid;
+  gap: 12px;
+  padding: 0;
+  list-style: none;
+}
+
+.favorites-list li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 3px 12px rgba(60, 40, 20, 0.08);
+}
+
+.favorites-list button {
+  border: 0;
+  background: transparent;
+  color: #3d2414;
+  cursor: pointer;
+  font-weight: 600;
+  text-align: left;
+}
+
+.favorites-list button:last-child {
+  color: #9b2c24;
+}
+
+.reserve-button:disabled,
+.search-button:disabled,
+.section-heading button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
+}

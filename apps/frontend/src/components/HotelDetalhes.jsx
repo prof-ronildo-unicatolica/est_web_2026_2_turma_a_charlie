@@ -189,8 +189,8 @@ export default function HotelDetalhes({ hotel, onVoltar }) {
 
                   </div>
 
-                  <button type="button" className="reserve-button">
-                    Reservar quarto
+                  <button type="button" className="reserve-button" disabled title="A funcionalidade de reservas ainda não está disponível na API.">
+                    Reservas em breve
                   </button>
 
                 </div>
