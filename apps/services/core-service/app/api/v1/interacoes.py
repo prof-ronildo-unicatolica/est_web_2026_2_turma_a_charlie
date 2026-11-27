@@ -1,9 +1,10 @@
 import uuid
-from datetime import date, datetime
+from datetime import date, datetime, timedelta, timezone
 from decimal import Decimal
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, ConfigDict, Field
+from sqlalchemy import and_, or_
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_admin, get_current_user
@@ -78,7 +79,10 @@ def criar_reserva(
 
     conflito = db.query(Reserva).filter(
         Reserva.quarto_id == quarto.id,
-        Reserva.status.in_(["pendente", "confirmada"]),
+        or_(
+            Reserva.status == "confirmada",
+            and_(Reserva.status == "pendente", Reserva.criada_em >= datetime.now(timezone.utc) - timedelta(minutes=30)),
+        ),
         Reserva.data_checkin < payload.data_checkout,
         Reserva.data_checkout > payload.data_checkin,
     ).first()
