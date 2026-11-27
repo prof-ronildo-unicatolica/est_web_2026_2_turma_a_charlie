@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy.orm import Session
 
-from app.api.deps import get_current_user
+from app.api.deps import get_current_admin, get_current_user
 from app.core.database import get_db
 from app.models.hotel import Hotel, Quarto
 from app.models.interacao import Avaliacao, Favorito, Reserva
@@ -100,6 +100,32 @@ def criar_reserva(
         valor_total=float(total),
     )
     db.add(reserva)
+    db.commit()
+    db.refresh(reserva)
+    return reserva
+
+
+@router.patch("/reservas/{reserva_id}/confirmar", response_model=ReservaPublic)
+def confirmar_reserva(
+    reserva_id: uuid.UUID,
+    db: Session = Depends(get_db),
+    _admin: Usuario = Depends(get_current_admin),
+):
+    reserva = db.query(Reserva).filter(Reserva.id == reserva_id).with_for_update().first()
+    if not reserva:
+        raise HTTPException(status_code=404, detail='Reserva não encontrada.')
+    if reserva.status == 'cancelada':
+        raise HTTPException(status_code=409, detail='Uma reserva cancelada não pode ser confirmada.')
+    conflito = db.query(Reserva).filter(
+        Reserva.quarto_id == reserva.quarto_id,
+        Reserva.id != reserva.id,
+        Reserva.status == 'confirmada',
+        Reserva.data_checkin < reserva.data_checkout,
+        Reserva.data_checkout > reserva.data_checkin,
+    ).first()
+    if conflito:
+        raise HTTPException(status_code=409, detail='Já existe outra reserva confirmada neste período.')
+    reserva.status = 'confirmada'
     db.commit()
     db.refresh(reserva)
     return reserva
