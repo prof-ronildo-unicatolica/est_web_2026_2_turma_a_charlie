@@ -18,7 +18,6 @@ from app.core.seed_mongo import seed_mongo_users
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Inicializacao: popular/semeiar o MongoDB
     mongo_db = get_mongo_db()
     await seed_mongo_users(mongo_db)
     yield
@@ -30,13 +29,18 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Configuracao de CORS para permitir acesso do Frontend
+origens_permitidas = [
+    origem.strip()
+    for origem in settings.BACKEND_CORS_ORIGINS.split(",")
+    if origem.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=origens_permitidas,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "Accept"],
 )
 
 app.include_router(health_router, prefix=settings.API_V1_STR)
