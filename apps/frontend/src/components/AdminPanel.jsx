@@ -42,6 +42,7 @@ export default function AdminPanel({ token, onVoltar }) {
     } catch (error) { setMensagem(error.message) }
   }
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { carregar() }, [])
 
   async function enviar(path, body, limpar) {
