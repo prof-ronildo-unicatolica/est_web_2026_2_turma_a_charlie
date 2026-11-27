@@ -23,7 +23,7 @@ class Reserva(Base):
     data_checkout: Mapped[date] = mapped_column(Date, nullable=False)
     adultos: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     criancas: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
-    status: Mapped[str] = mapped_column(String(20), nullable=False, default="confirmada")
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default="pendente")
     valor_total: Mapped[float] = mapped_column(nullable=False)
     criada_em: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
