@@ -3,6 +3,7 @@ from decimal import Decimal
 
 from app.models.hotel import Cidade, Hotel, Quarto
 from app.models.interacao import Reserva
+from app.models.usuario import Usuario
 
 
 def criar_hotel_com_quarto(db_session):
@@ -73,7 +74,7 @@ def test_favoritos_persistem_na_conta(client, db_session):
 
 def test_avaliacao_exige_hospedagem_concluida(client, db_session):
     hotel, quarto = criar_hotel_com_quarto(db_session)
-    usuario = db_session.query(__import__("app.models.usuario", fromlist=["Usuario"]).Usuario).filter_by(email="cliente@hotel.com").first()
+    usuario = db_session.query(Usuario).filter_by(email="cliente@hotel.com").first()
     checkout = date.today() - timedelta(days=1)
     checkin = checkout - timedelta(days=2)
     reserva = Reserva(
