@@ -3,6 +3,7 @@ import './custom.css'
 import Login from './components/Login'
 import Cadastro from './components/Cadastro'
 import AdminPanel from './components/AdminPanel'
+import MinhasReservas from './components/MinhasReservas'
 import HotelDetalhes from './components/HotelDetalhes'
 
 const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/$/, '')
@@ -183,6 +184,10 @@ function App() {
     }} />
   }
 
+  if (tela === 'reservas' && usuarioLogado) {
+    return <MinhasReservas token={localStorage.getItem('access_token')} onVoltar={() => setTela('home')} />
+  }
+
   if (tela === 'admin' && usuarioLogado?.is_admin) {
     return <AdminPanel token={localStorage.getItem('access_token')} onVoltar={() => setTela('home')} />
   }
@@ -232,6 +237,7 @@ function App() {
         {usuarioLogado ? (
           <>
             {usuarioLogado.is_admin && <button type="button" className="login-button" onClick={() => setTela('admin')}>Administração</button>}
+            <button type="button" className="login-button" onClick={() => setTela('reservas')}>Minhas reservas</button>
             <span>Olá, {usuarioLogado.nome || 'usuário'}</span>
 
             <button type="button"
@@ -385,6 +391,10 @@ function App() {
               type="button"
               className="search-button"
               onClick={() => {
+                if (Boolean(checkin) !== Boolean(checkout)) {
+                  setErro('Informe as duas datas para pesquisar disponibilidade.')
+                  return
+                }
                 if (checkin && checkout && checkout <= checkin) {
                   setErro('A data de check-out deve ser posterior ao check-in.')
                   return
