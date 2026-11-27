@@ -1,8 +1,5 @@
 import uuid
 
-from pydantic import BaseModel, Field
-
-
 class CidadeBase(BaseModel):
     nome: str
     estado: str
@@ -18,4 +15,6 @@ class CidadeUpdate(BaseModel):
 
 
 class CidadePublic(CidadeBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: uuid.UUID

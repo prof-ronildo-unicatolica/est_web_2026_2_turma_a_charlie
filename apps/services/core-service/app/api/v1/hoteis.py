@@ -1,3 +1,4 @@
+
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -5,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_admin
 from app.core.database import get_db, get_mongo_db
+from app.models.hotel import Cidade
 from app.mensagens import HOTEL_NAO_ENCONTRADO
 from app.models.comodidade import Comodidade
 from app.models.hotel import Cidade, Hotel
@@ -43,6 +45,13 @@ async def criar_hotel(
             detail="Cidade não encontrada.",
         )
 
+    try:
+        return await service.create(payload)
+    except ValueError as erro:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=str(erro),
+        ) from erro
     return await service.create(payload)
 
 
@@ -88,7 +97,7 @@ def obter_hotel(
 
     if not hotel:
         raise HTTPException(
-            status_code=404,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail=HOTEL_NAO_ENCONTRADO,
         )
 
@@ -118,63 +127,3 @@ def listar_hoteis_por_cidade(
 
     return service.list_by_cidade(cidade_id)
 
-
-@router.patch("/{hotel_id}", response_model=HotelResponseSchema)
-async def atualizar_hotel(
-    hotel_id: uuid.UUID,
-    payload: HotelUpdateSchema,
-    db: Session = Depends(get_db),
-    mongo_db=Depends(get_mongo_db),
-    _admin=Depends(get_current_admin),
-):
-    hotel = db.query(Hotel).filter(Hotel.id == hotel_id).first()
-    if not hotel:
-        raise HTTPException(status_code=404, detail=HOTEL_NAO_ENCONTRADO)
-
-    dados = payload.model_dump(exclude_unset=True)
-    if not dados or any(valor is None for campo, valor in dados.items() if campo != "comodidade_ids"):
-        raise HTTPException(status_code=422, detail="Informe campos válidos para atualização.")
-
-    if "nome" in dados:
-        dados["nome"] = dados["nome"].strip()
-        if not dados["nome"]:
-            raise HTTPException(status_code=422, detail="O nome do hotel não pode ser vazio.")
-
-    if "cidade_id" in dados:
-        cidade = db.query(Cidade).filter(Cidade.id == dados["cidade_id"]).first()
-        if not cidade:
-            raise HTTPException(status_code=404, detail="Cidade não encontrada.")
-
-    if "comodidade_ids" in dados:
-        ids = dados.pop("comodidade_ids") or []
-        comodidades = db.query(Comodidade).filter(Comodidade.id.in_(ids)).all() if ids else []
-        if {item.id for item in comodidades} != set(ids):
-            raise HTTPException(status_code=422, detail="Uma ou mais comodidades não foram encontradas.")
-        hotel.comodidades = comodidades
-
-    for campo, valor in dados.items():
-        setattr(hotel, campo, valor)
-
-    db.commit()
-    db.refresh(hotel)
-    await CatalogoSyncService(db, mongo_db).sincronizar_hotel(hotel.id)
-    return hotel
-
-
-@router.delete("/{hotel_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def excluir_hotel(
-    hotel_id: uuid.UUID,
-    db: Session = Depends(get_db),
-    mongo_db=Depends(get_mongo_db),
-    _admin=Depends(get_current_admin),
-):
-    hotel = db.query(Hotel).filter(Hotel.id == hotel_id).first()
-    if not hotel:
-        raise HTTPException(status_code=404, detail=HOTEL_NAO_ENCONTRADO)
-    possui_reservas = db.query(Reserva).filter(Reserva.hotel_id == hotel_id).first()
-    if possui_reservas:
-        raise HTTPException(status_code=409, detail="Não é possível excluir um hotel que possui histórico de reservas.")
-    db.delete(hotel)
-    db.commit()
-    await CatalogoRepository(mongo_db).remover_hotel(str(hotel_id))
-    return None

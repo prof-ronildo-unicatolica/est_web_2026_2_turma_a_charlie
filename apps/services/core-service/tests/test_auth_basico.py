@@ -85,3 +85,15 @@ def test_cadastro_publico_nao_concede_permissao_admin(client):
     )
 
     assert acesso_admin.status_code == 403
+
+def test_cadastro_com_email_existente_retorna_409(client):
+    dados = {
+        "nome": "Novo Usuario",
+        "email": "cliente@hotel.com",
+        "senha": "SenhaTeste123!",
+    }
+
+    resposta = client.post(f"{BASE}/register", json=dados)
+
+    assert resposta.status_code == 409
+    assert resposta.json()["detail"] == "E-mail já cadastrado"
