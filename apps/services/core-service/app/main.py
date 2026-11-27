@@ -15,10 +15,12 @@ from app.api.v1.sobre import router as sobre_router
 from app.core.config import settings
 from app.core.database import get_mongo_db
 from app.core.seed_mongo import seed_mongo_users
+from app.core.seed_admin import seed_initial_admin
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    seed_initial_admin()
     mongo_db = get_mongo_db()
     await mongo_db.command('ping')
     await seed_mongo_users(mongo_db)
