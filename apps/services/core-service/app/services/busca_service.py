@@ -1,7 +1,8 @@
-from datetime import date
+from datetime import date, datetime, timedelta, timezone
 from uuid import UUID
 
 from motor.motor_asyncio import AsyncIOMotorDatabase
+from sqlalchemy import and_, or_
 from sqlalchemy.orm import Session
 
 from app.models.interacao import Reserva
@@ -49,7 +50,10 @@ class BuscaService:
         if quartos_ids:
             reservas = self.db.query(Reserva.quarto_id).filter(
                 Reserva.quarto_id.in_(quartos_ids),
-                Reserva.status.in_(["pendente", "confirmada"]),
+                or_(
+                    Reserva.status == "confirmada",
+                    and_(Reserva.status == "pendente", Reserva.criada_em >= datetime.now(timezone.utc) - timedelta(minutes=30)),
+                ),
                 Reserva.data_checkin < checkout,
                 Reserva.data_checkout > checkin,
             ).all()
