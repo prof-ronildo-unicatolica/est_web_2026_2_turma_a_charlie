@@ -41,7 +41,7 @@ export default function Login({ onVoltar, onLogin, onIrCadastro }) {
       }
 
       localStorage.setItem('access_token', data.access_token)
-      onLogin()
+      await onLogin()
 
     } catch (error) {
       console.error(error)
