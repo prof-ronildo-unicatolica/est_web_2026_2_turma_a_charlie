@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 
 from sqlalchemy import CheckConstraint, Date, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column
@@ -19,7 +19,7 @@ class Reserva(Base):
     usuario_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("usuarios.id", ondelete="CASCADE"), nullable=False, index=True)
     hotel_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("hoteis.id", ondelete="CASCADE"), nullable=False, index=True)
     quarto_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("quartos.id", ondelete="CASCADE"), nullable=False, index=True)
-    data_checkin: Mapped[datetime.date] = mapped_column(Date, nullable=False)
+    data_checkin: Mapped[date] = mapped_column(Date, nullable=False)
     data_checkout: Mapped[datetime.date] = mapped_column(Date, nullable=False)
     adultos: Mapped[int] = mapped_column(Integer, nullable=False, default=1)
     criancas: Mapped[int] = mapped_column(Integer, nullable=False, default=0)
