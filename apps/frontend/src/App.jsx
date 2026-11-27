@@ -261,6 +261,7 @@ function App() {
               onClick={() => {
                 localStorage.removeItem('access_token')
                 setUsuarioLogado(null)
+                setFavoritos([])
               }}
             >
               Sair
