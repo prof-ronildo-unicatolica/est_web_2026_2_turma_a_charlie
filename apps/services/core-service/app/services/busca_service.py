@@ -12,7 +12,7 @@ from app.repositories.catalogo_repository import CatalogoRepository
 class BuscaService:
     """Regras de negócio da busca pública de hotéis."""
 
-    def __init__(self, db, sql_db: Session | None = None):
+    def __init__(self, db: AsyncIOMotorDatabase, sql_db: Session | None = None):
         self.repository = CatalogoRepository(db)
         self.db = sql_db
 
