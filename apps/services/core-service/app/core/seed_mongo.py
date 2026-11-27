@@ -10,19 +10,22 @@ logger = logging.getLogger(__name__)
 
 
 async def seed_mongo_users(db: AsyncIOMotorDatabase):
-    users_collection = db["users"]
-    existing_user = await users_collection.find_one({"email": "admin@hotel.com"})
-    if existing_user:
-        logger.info("MongoDB seed user already exists.")
-        return
+    try:
+        users_collection = db["users"]
+        existing_user = await users_collection.find_one({"email": "admin@hotel.com"})
+        if existing_user:
+            logger.info("MongoDB seed user already exists.")
+            return
 
-    hashed_password = pwd_context.hash(settings.MONGO_ADMIN_PASSWORD)
-    admin_user = {
-        "username": "admin",
-        "email": "admin@hotel.com",
-        "password_hash": hashed_password,
-        "role": "admin_master",
-        "active": True,
-    }
-    await users_collection.insert_one(admin_user)
-    logger.info("MongoDB seed user created successfully.")
+        hashed_password = pwd_context.hash(settings.MONGO_ADMIN_PASSWORD)
+        admin_user = {
+            "username": "admin",
+            "email": "admin@hotel.com",
+            "password_hash": hashed_password,
+            "role": "admin_master",
+            "active": True,
+        }
+        await users_collection.insert_one(admin_user)
+        logger.info("MongoDB seed user created successfully.")
+    except Exception:
+        logger.exception("MongoDB seed falhou; verifique MONGODB_URL e autenticação.")
