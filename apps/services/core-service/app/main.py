@@ -20,6 +20,7 @@ from app.core.seed_mongo import seed_mongo_users
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     mongo_db = get_mongo_db()
+    await mongo_db.command('ping')
     await seed_mongo_users(mongo_db)
     yield
 
