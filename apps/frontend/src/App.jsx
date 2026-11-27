@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import './custom.css'
 import Login from './components/Login'
 import HotelDetalhes from './components/HotelDetalhes'
@@ -14,6 +14,15 @@ function App() {
   const [hoteis, setHoteis] = useState([])
   const [loading, setLoading] = useState(true)
   const [erro, setErro] = useState(null)
+  const [favoritos, setFavoritos] = useState(() => {
+    try {
+      const salvos = JSON.parse(localStorage.getItem('hotel_favoritos') || '[]')
+      return Array.isArray(salvos) ? salvos : []
+    } catch {
+      return []
+    }
+  })
+  const requisicaoEmAndamento = useRef(false)
 
   const [cidade, setCidade] = useState('')
   const [estrelas, setEstrelas] = useState('')
@@ -26,7 +35,21 @@ function App() {
     carregarHoteis()
   }, [])
 
+  useEffect(() => {
+    localStorage.setItem('hotel_favoritos', JSON.stringify(favoritos))
+  }, [favoritos])
+
+  function alternarFavorito(hotelId) {
+    setFavoritos((atuais) =>
+      atuais.includes(hotelId)
+        ? atuais.filter((id) => id !== hotelId)
+        : [...atuais, hotelId]
+    )
+  }
+
   async function carregarHoteis() {
+    if (requisicaoEmAndamento.current) return
+    requisicaoEmAndamento.current = true
     try {
       setLoading(true)
 
@@ -45,10 +68,13 @@ function App() {
       setErro('Não foi possível carregar os hotéis.')
     } finally {
       setLoading(false)
+      requisicaoEmAndamento.current = false
     }
   }
 
   async function pesquisar() {
+    if (requisicaoEmAndamento.current) return
+    requisicaoEmAndamento.current = true
     try {
       setLoading(true)
 
@@ -81,6 +107,7 @@ function App() {
       setErro('Não foi possível realizar a busca.')
     } finally {
       setLoading(false)
+      requisicaoEmAndamento.current = false
     }
   }
 
@@ -130,8 +157,8 @@ function App() {
 
         <nav className="hotel-nav">
           <a href="#inicio">◉ <span>Explorar</span></a>
-          <a href="#reservas">▣ <span>Minhas reservas</span></a>
-          <a href="#favoritos">♡ <span>Favoritos</span></a>
+          <a href="#hoteis">▣ <span>Hotéis</span></a>
+          <a href="#favoritos">♡ <span>Favoritos ({favoritos.length})</span></a>
         </nav>
 
         <div className="user-area">
@@ -281,24 +308,27 @@ function App() {
               </div>
             </div>
 
-            <button type="button"
+            <button
+              type="button"
               className="search-button"
               onClick={pesquisar}
+              disabled={loading}
+              aria-busy={loading}
             >
-              Pesquisar
+              {loading ? 'Buscando...' : 'Pesquisar'}
             </button>
 
           </div>
         </section>
 
         {/* HOTELS */}
-        <section className="hotel-section">
+        <section className="hotel-section" id="hoteis">
 
           <div className="section-heading">
             <h2>Sugestões para você</h2>
 
-            <button type="button" onClick={carregarHoteis}>
-              Ver todas →
+            <button type="button" onClick={carregarHoteis} disabled={loading}>
+              {loading ? 'Carregando...' : 'Ver todas →'}
             </button>
           </div>
 
@@ -331,15 +361,10 @@ function App() {
 
                 const preco = menorPreco(hotel)
 
-                return (
-                  <article
-                      className="hotel-card"
-                      key={hotel.hotel_id}
-                      onClick={() => {
-                        setHotelSelecionado(hotel)
-                        setTela('detalhes')
-                      }}>
+                const favorito = favoritos.includes(hotel.hotel_id)
 
+                return (
+                  <article className="hotel-card" key={hotel.hotel_id}>
                     <div className="hotel-image">
 
                       <img
@@ -361,8 +386,14 @@ function App() {
                         alt={hotel.nome}
                       />
 
-                      <button type="button" className="favorite-button">
-                        ♡
+                      <button
+                        type="button"
+                        className="favorite-button"
+                        aria-label={favorito ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+                        aria-pressed={favorito}
+                        onClick={() => alternarFavorito(hotel.hotel_id)}
+                      >
+                        {favorito ? '♥' : '♡'}
                       </button>
                     </div>
 
@@ -418,6 +449,16 @@ function App() {
 
                     </div>
 
+                    <button
+                      type="button"
+                      className="hotel-open-button"
+                      onClick={() => {
+                        setHotelSelecionado(hotel)
+                        setTela('detalhes')
+                      }}
+                    >
+                      Ver detalhes
+                    </button>
                   </article>
                 )
               })}
@@ -433,7 +474,32 @@ function App() {
 
         </section>
 
-                {/* AVALIAÇÕES */}
+        <section className="favorites-section" id="favoritos" aria-labelledby="favorites-title">
+          <div className="section-heading">
+            <h2 id="favorites-title">Seus favoritos</h2>
+          </div>
+          {favoritos.length === 0 ? (
+            <p className="empty-message">Você ainda não adicionou hotéis aos favoritos.</p>
+          ) : (
+            <ul className="favorites-list">
+              {hoteis.filter((hotel) => favoritos.includes(hotel.hotel_id)).map((hotel) => (
+                <li key={hotel.hotel_id}>
+                  <button type="button" onClick={() => {
+                    setHotelSelecionado(hotel)
+                    setTela('detalhes')
+                  }}>
+                    {hotel.nome} — {hotel.cidade_nome}, {hotel.cidade_estado}
+                  </button>
+                  <button type="button" onClick={() => alternarFavorito(hotel.hotel_id)}>
+                    Remover
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+
+        {/* AVALIAÇÕES */}
         <section className="reviews-section">
           <div className="reviews-header">
             <div className="reviews-icon">
