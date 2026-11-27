@@ -17,13 +17,7 @@ Este repositório **já vem com o projeto-base pronto**: backend em FastAPI, fro
 React e toda a infraestrutura (PostgreSQL, MongoDB, RabbitMQ) em Docker. Você não
 precisa criar a estrutura do zero — seu trabalho é evoluí-la a cada sprint.
 
-Antes de subir os containers, configure as variáveis de ambiente na raiz do projeto:
-
-```bash
-cp .env.example .env
-```
-
-Edite o `.env` e substitua todas as senhas/chaves de exemplo por valores fortes e exclusivos. A senha em `MONGODB_URL` deve ser a mesma de `MONGO_ADMIN_PASSWORD` (com caracteres especiais codificados para URL). Não publique o arquivo `.env`.
+Antes de subir os containers, configure as variáveis de ambiente conforme os passos abaixo. Substitua todas as senhas/chaves de exemplo por valores fortes e exclusivos. A senha em `MONGODB_URL` deve ser a mesma de `MONGO_ADMIN_PASSWORD` (com caracteres especiais codificados para URL). Não publique o arquivo `.env`.
 
 Para colocar tudo no ar:
 
