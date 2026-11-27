@@ -4,7 +4,6 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_admin
-
 from app.core.database import get_db, get_mongo_db
 from app.mensagens import HOTEL_NAO_ENCONTRADO
 from app.models.comodidade import Comodidade
