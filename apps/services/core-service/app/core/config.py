@@ -30,6 +30,9 @@ class Settings(BaseSettings):
 
     # Em produção, defina uma chave aleatória forte via ambiente.
     SECRET_KEY: str = "dev-only-change-this-secret-key-before-deploy"
+    INITIAL_ADMIN_EMAIL: str | None = None
+    INITIAL_ADMIN_PASSWORD: str | None = None
+    INITIAL_ADMIN_NAME: str = "Administrador"
     BACKEND_CORS_ORIGINS: str = "http://localhost:5173,http://127.0.0.1:5173"
 
 
