@@ -182,6 +182,7 @@ function App() {
     return (
       <HotelDetalhes
         hotel={hotelSelecionado}
+        token={localStorage.getItem('access_token')}
         onVoltar={() => setTela('home')}
       />
     )
