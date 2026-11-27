@@ -14,10 +14,9 @@ from app.api.v1.hoteis import router as hoteis_router
 from app.api.v1.quartos import router as quartos_router
 from app.api.v1.sobre import router as sobre_router
 from app.core.config import settings
-from app.core.database import get_mongo_db
-from app.core.seed_mongo import seed_mongo_users
+from app.core.database import SessionLocal, get_mongo_db
 from app.core.seed_admin import seed_initial_admin
-from app.core.database import SessionLocal
+from app.core.seed_mongo import seed_mongo_users
 from app.models.hotel import Hotel
 from app.services.catalogo_sync_service import CatalogoSyncService
 
