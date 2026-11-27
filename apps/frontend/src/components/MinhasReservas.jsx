@@ -23,6 +23,7 @@ export default function MinhasReservas({ token, onVoltar }) {
     }
   }
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { carregar() }, [token])
 
   async function cancelar(id) {
