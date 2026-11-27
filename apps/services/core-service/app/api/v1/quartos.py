@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from app.api.deps import get_current_admin
 from app.core.database import get_db, get_mongo_db
 from app.mensagens import QUARTO_NAO_ENCONTRADO
+from app.models.interacao import Reserva
 from app.schemas.quarto import (
     QuartoCreateSchema,
     QuartoResponseSchema,
@@ -79,6 +80,10 @@ async def atualizar_quarto(
     mongo_db: AsyncIOMotorDatabase = Depends(get_mongo_db),
     admin: dict = Depends(get_current_admin),
 ):
+    dados = payload.model_dump(exclude_unset=True)
+    if not dados or any(valor is None for valor in dados.values()):
+        raise HTTPException(status_code=422, detail='Informe campos válidos para atualização.')
+
     service = QuartoService(db, mongo_db)
     quarto = await service.update(quarto_id, payload)
 
@@ -101,6 +106,10 @@ async def deletar_quarto(
     mongo_db: AsyncIOMotorDatabase = Depends(get_mongo_db),
     admin: dict = Depends(get_current_admin),
 ):
+    possui_reservas = db.query(Reserva).filter(Reserva.quarto_id == quarto_id).first()
+    if possui_reservas:
+        raise HTTPException(status_code=409, detail='Não é possível excluir um quarto com histórico de reservas.')
+
     service = QuartoService(db, mongo_db)
     quarto = await service.delete(quarto_id)
 
