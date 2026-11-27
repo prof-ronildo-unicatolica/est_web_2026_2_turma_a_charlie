@@ -68,6 +68,9 @@ services:
       - MONGO_ADMIN_PASSWORD=${MONGO_ADMIN_PASSWORD:?Defina MONGO_ADMIN_PASSWORD no arquivo .env}
       - MONGODB_DB=hotel_mongo_dev
       - SECRET_KEY=${SECRET_KEY:?Defina SECRET_KEY no arquivo .env}
+      - INITIAL_ADMIN_EMAIL=${INITIAL_ADMIN_EMAIL:-}
+      - INITIAL_ADMIN_PASSWORD=${INITIAL_ADMIN_PASSWORD:-}
+      - INITIAL_ADMIN_NAME=${INITIAL_ADMIN_NAME:-Administrador}
       - BACKEND_CORS_ORIGINS=${BACKEND_CORS_ORIGINS:-http://localhost:5173,http://127.0.0.1:5173}
       - RABBITMQ_URL=amqp://${RABBITMQ_USER:-hotel_app}:${RABBITMQ_PASSWORD:?Defina RABBITMQ_PASSWORD no arquivo .env}@rabbitmq:5672/
     ports:
