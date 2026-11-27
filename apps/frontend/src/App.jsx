@@ -12,6 +12,8 @@ function App() {
 )
   const [hotelSelecionado, setHotelSelecionado] = useState(null)
   const [hoteis, setHoteis] = useState([])
+  const [cidades, setCidades] = useState([])
+  const [erroCidades, setErroCidades] = useState('')
   const [loading, setLoading] = useState(true)
   const [erro, setErro] = useState(null)
   const [favoritos, setFavoritos] = useState(() => {
@@ -33,7 +35,21 @@ function App() {
 
   useEffect(() => {
     carregarHoteis()
+    carregarCidades()
   }, [])
+
+  async function carregarCidades() {
+    try {
+      const response = await fetch(`${API_URL}/api/v1/cidades`)
+      if (!response.ok) throw new Error('Não foi possível carregar as cidades.')
+      const data = await response.json()
+      setCidades(Array.isArray(data) ? data : [])
+      setErroCidades('')
+    } catch (error) {
+      console.error(error)
+      setErroCidades('Não foi possível carregar as cidades.')
+    }
+  }
 
   useEffect(() => {
     localStorage.setItem('hotel_favoritos', JSON.stringify(favoritos))
@@ -223,12 +239,19 @@ function App() {
               <div>
                 <label>Para onde?</label>
 
-                <input
-                  type="text"
-                  placeholder="ID da cidade"
+                <select
+                  aria-label="Destino"
                   value={cidade}
                   onChange={(e) => setCidade(e.target.value)}
-                />
+                >
+                  <option value="">Todas as cidades</option>
+                  {cidades.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.nome} - {item.estado}
+                    </option>
+                  ))}
+                </select>
+                {erroCidades && <small role="alert">{erroCidades}</small>}
               </div>
             </div>
 
@@ -311,7 +334,13 @@ function App() {
             <button
               type="button"
               className="search-button"
-              onClick={pesquisar}
+              onClick={() => {
+                if (checkin && checkout && checkout <= checkin) {
+                  setErro('A data de check-out deve ser posterior ao check-in.')
+                  return
+                }
+                pesquisar()
+              }}
               disabled={loading}
               aria-busy={loading}
             >
