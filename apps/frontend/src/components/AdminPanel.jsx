@@ -109,6 +109,35 @@ export default function AdminPanel({ token, onVoltar }) {
     } catch (error) { setMensagem(error.message) }
   }
 
+  async function editarQuarto(item) {
+    const tipo = window.prompt('Tipo do quarto:', item.tipo)
+    if (tipo === null) return
+    const preco = window.prompt('Preço da diária:', String(item.preco_diaria))
+    if (preco === null) return
+    const adultos = window.prompt('Capacidade de adultos:', String(item.max_adultos))
+    if (adultos === null) return
+    const criancas = window.prompt('Capacidade de crianças:', String(item.max_criancas))
+    if (criancas === null) return
+    try {
+      await requisitar(`/quartos/${item.id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ tipo, preco_diaria: Number(preco), max_adultos: Number(adultos), max_criancas: Number(criancas) }),
+      })
+      await carregar()
+      setMensagem('Quarto atualizado.')
+    } catch (error) { setMensagem(error.message) }
+  }
+
+  async function editarComodidade(item) {
+    const nome = window.prompt('Nome da comodidade:', item.nome)
+    if (nome === null) return
+    try {
+      await requisitar(`/comodidades/${item.id}`, { method: 'PUT', body: JSON.stringify({ nome }) })
+      await carregar()
+      setMensagem('Comodidade atualizada.')
+    } catch (error) { setMensagem(error.message) }
+  }
+
   async function excluirQuarto(id) {
     if (!window.confirm('Deseja realmente excluir este quarto?')) return
     try {
@@ -166,7 +195,7 @@ export default function AdminPanel({ token, onVoltar }) {
           <label>Crianças<input required type="number" min="0" value={quarto.max_criancas} onChange={e => setQuarto({ ...quarto, max_criancas: e.target.value })} /></label>
           <button type="submit" disabled={!hoteis.length}>Cadastrar quarto</button>
         </form>
-        <ul>{quartos.map(item => <li key={item.id}>{item.tipo} — R$ {Number(item.preco_diaria).toFixed(2)} <button type="button" onClick={() => excluirQuarto(item.id)}>Excluir</button></li>)}</ul>
+        <ul>{quartos.map(item => <li key={item.id}>{item.tipo} — R$ {Number(item.preco_diaria).toFixed(2)} <button type="button" onClick={() => editarQuarto(item)}>Editar</button> <button type="button" onClick={() => excluirQuarto(item.id)}>Excluir</button></li>)}</ul>
       </section>
 
       <section className="admin-section">
@@ -175,7 +204,7 @@ export default function AdminPanel({ token, onVoltar }) {
           <label>Nome<input required value={comodidade} onChange={e => setComodidade(e.target.value)} /></label>
           <button type="submit">Cadastrar comodidade</button>
         </form>
-        <ul>{comodidades.map(item => <li key={item.id}>{item.nome} <button type="button" onClick={() => excluirComodidade(item.id)}>Excluir</button></li>)}</ul>
+        <ul>{comodidades.map(item => <li key={item.id}>{item.nome} <button type="button" onClick={() => editarComodidade(item)}>Editar</button> <button type="button" onClick={() => excluirComodidade(item.id)}>Excluir</button></li>)}</ul>
       </section>
 
       <section className="admin-section">
