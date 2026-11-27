@@ -3,7 +3,7 @@ import './custom.css'
 import Login from './components/Login'
 import HotelDetalhes from './components/HotelDetalhes'
 
-const API_URL = 'http://localhost:8000'
+const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/$/, '')
 
 function App() {
   const [tela, setTela] = useState('home')
@@ -88,8 +88,8 @@ function App() {
   return (
     <Login
       onVoltar={() => setTela('home')}
-      onLogin={(token) => {
-        setUsuarioLogado(token)
+      onLogin={() => {
+        setUsuarioLogado(true)
         setTela('home')
       }}
     />
@@ -139,7 +139,7 @@ function App() {
 
         {usuarioLogado ? (
           <>
-            <span>Olá, {usuarioLogado}</span>
+            <span>Olá, usuário</span>
 
             <button type="button"
               className="login-button"
