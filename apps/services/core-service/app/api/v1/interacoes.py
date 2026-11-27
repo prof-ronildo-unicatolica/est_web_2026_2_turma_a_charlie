@@ -11,8 +11,10 @@ from app.api.deps import get_current_admin, get_current_user
 from app.core.database import get_db
 from app.models.hotel import Hotel, Quarto
 from app.models.interacao import Avaliacao, Favorito, Reserva
+from app.models.tarifa_temporada import TarifaTemporada
 from app.models.usuario import Usuario
 from app.services.audit_service import registrar_evento
+from app.services.reserva_service import calcular_total
 
 router = APIRouter(tags=["Reservas, avaliações e favoritos"])
 
@@ -92,7 +94,16 @@ async def criar_reserva(
 
     hotel = db.query(Hotel).filter(Hotel.id == quarto.hotel_id).first()
     noites = (payload.data_checkout - payload.data_checkin).days
-    total = Decimal(str(quarto.preco_diaria)) * noites
+    temporada = db.query(TarifaTemporada).filter(
+        TarifaTemporada.data_inicio <= payload.data_checkin,
+        TarifaTemporada.data_fim >= payload.data_checkout,
+    ).first()
+    percentual_temporada = temporada.percentual if temporada else Decimal('0.00')
+    total = calcular_total(
+        preco_diaria=Decimal(str(quarto.preco_diaria)),
+        quantidade_diarias=noites,
+        percentual_temporada=percentual_temporada,
+    )
     reserva = Reserva(
         usuario_id=usuario.id,
         hotel_id=hotel.id,
