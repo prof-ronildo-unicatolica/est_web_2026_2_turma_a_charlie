@@ -133,8 +133,8 @@ async def atualizar_hotel(
         raise HTTPException(status_code=404, detail=HOTEL_NAO_ENCONTRADO)
 
     dados = payload.model_dump(exclude_unset=True)
-    if not dados:
-        raise HTTPException(status_code=422, detail="Informe ao menos um campo.")
+    if not dados or any(valor is None for campo, valor in dados.items() if campo != "comodidade_ids"):
+        raise HTTPException(status_code=422, detail="Informe campos válidos para atualização.")
 
     if "cidade_id" in dados:
         cidade = db.query(Cidade).filter(Cidade.id == dados["cidade_id"]).first()
