@@ -6,11 +6,11 @@ from sqlalchemy import (
     Date,
     DateTime,
     ForeignKey,
-    func,
     Integer,
     String,
     Text,
     UniqueConstraint,
+    func,
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
