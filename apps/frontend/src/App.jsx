@@ -481,7 +481,7 @@ function App() {
           {favoritos.length === 0 ? (
             <p className="empty-message">Você ainda não adicionou hotéis aos favoritos.</p>
           ) : (
-            {hoteis.some((hotel) => favoritos.includes(hotel.hotel_id)) ? (
+            hoteis.some((hotel) => favoritos.includes(hotel.hotel_id)) ? (
               <ul className="favorites-list">
                 {hoteis.filter((hotel) => favoritos.includes(hotel.hotel_id)).map((hotel) => (
                   <li key={hotel.hotel_id}>
@@ -501,7 +501,7 @@ function App() {
               <p className="empty-message">
                 Seus favoritos continuam salvos. Clique em “Ver todas” para carregar a lista completa de hotéis.
               </p>
-            )}
+            )
           )}
         </section>
 
