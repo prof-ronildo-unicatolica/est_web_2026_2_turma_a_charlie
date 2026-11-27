@@ -17,6 +17,8 @@ Este repositório **já vem com o projeto-base pronto**: backend em FastAPI, fro
 React e toda a infraestrutura (PostgreSQL, MongoDB, RabbitMQ) em Docker. Você não
 precisa criar a estrutura do zero — seu trabalho é evoluí-la a cada sprint.
 
+Antes de subir os containers, configure as variáveis de ambiente conforme os passos abaixo. Substitua todas as senhas/chaves de exemplo por valores fortes e exclusivos. A senha em `MONGODB_URL` deve ser a mesma de `MONGO_ADMIN_PASSWORD` (com caracteres especiais codificados para URL). Não publique o arquivo `.env`.
+
 Para colocar tudo no ar:
 
 ```bash
@@ -24,11 +26,15 @@ Para colocar tudo no ar:
 git clone <url-ssh-deste-repositorio>
 cd <pasta-do-repositorio>
 
-# 2. Suba a stack completa (a primeira vez demora alguns minutos)
+# 2. Configure o ambiente
+cp .env.example .env
+# Edite .env antes de continuar
+
+# 3. Suba a stack completa (a primeira vez demora alguns minutos)
 docker compose up -d --build
 
-# 3. Confirme que a API respondeu
-curl http://localhost:8000/health
+# 4. Confirme que a API respondeu
+curl http://localhost:8000/api/v1/health
 ```
 
 | Serviço | Endereço |

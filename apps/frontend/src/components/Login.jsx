@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-const API_URL = 'http://localhost:8000'
+const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/$/, '')
 
 export default function Login({ onVoltar, onLogin }) {
   const [email, setEmail] = useState('')
@@ -33,11 +33,8 @@ export default function Login({ onVoltar, onLogin }) {
         throw new Error(data.detail || 'E-mail ou senha incorretos.')
       }
 
-    // O backend básico retorna o e-mail como access_token.
-    localStorage.setItem('access_token', data.access_token)
-
-     // Atualiza o App e volta para a Home.
-    onLogin(data.access_token)
+      localStorage.setItem('access_token', data.access_token)
+      onLogin()
 
     } catch (error) {
       console.error(error)

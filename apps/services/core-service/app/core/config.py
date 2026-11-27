@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "Sistema de Reservas - Core Service"
     API_V1_STR: str = "/api/v1"
 
-    # Configurações do PostgreSQL
+    # Credenciais podem ser sobrescritas por variáveis de ambiente.
     POSTGRES_SERVER: str = "localhost"
     POSTGRES_USER: str = "postgres"
     POSTGRES_PASSWORD: str = "postgres"
@@ -17,15 +17,20 @@ class Settings(BaseSettings):
 
     @property
     def SQLALCHEMY_DATABASE_URI(self) -> str:
-        return f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}@{self.POSTGRES_SERVER}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
+        return (
+            f"postgresql://{self.POSTGRES_USER}:{self.POSTGRES_PASSWORD}"
+            f"@{self.POSTGRES_SERVER}:{self.POSTGRES_PORT}/{self.POSTGRES_DB}"
+        )
 
-    # Configurações do MongoDB
     MONGODB_URL: str
     MONGODB_DB: str = "hotel_mongo_dev"
     MONGO_ADMIN_PASSWORD: str
 
-    # Configurações do RabbitMQ
     RABBITMQ_URL: str = "amqp://guest:guest@localhost:5672/"
+
+    # Em produção, defina uma chave aleatória forte via ambiente.
+    SECRET_KEY: str = "dev-only-change-this-secret-key-before-deploy"
+    BACKEND_CORS_ORIGINS: str = "http://localhost:5173,http://127.0.0.1:5173"
 
 
 settings = Settings()

@@ -1,13 +1,21 @@
 PROJECT_NAME="Sistema de Reservas - Core Service"
 API_V1_STR="/api/v1"
 
-# PostgreSQL Config
+# PostgreSQL (use senha forte fora do ambiente local)
 POSTGRES_SERVER=localhost
 POSTGRES_USER=postgres
-POSTGRES_PASSWORD=postgres
+POSTGRES_PASSWORD=altere-esta-senha
 POSTGRES_DB=hotel_db_dev
 POSTGRES_PORT=5432
 
-# MongoDB Config
-MONGODB_URL=mongodb://USUARIO:SENHA@localhost:27017/?authSource=admin
+# MongoDB
+MONGODB_URL=mongodb://admin:SENHA_FORTE@localhost:27017/?authSource=admin
 MONGODB_DB=hotel_mongo_dev
+MONGO_ADMIN_PASSWORD=SENHA_FORTE
+
+# RabbitMQ
+RABBITMQ_URL=amqp://hotel_app:SENHA_FORTE@localhost:5672/
+
+# Segurança / CORS
+SECRET_KEY=gere-uma-chave-aleatoria-com-pelo-menos-32-caracteres
+BACKEND_CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
