@@ -57,7 +57,7 @@ try {
         }
     }
     if (-not $urlUpdated) { $newLines += "MONGODB_URL=$mongoUrl" }
-    Set-Content -Path $envFile -Value $newLines -Encoding utf8
+    [System.IO.File]::WriteAllLines($envFile, $newLines, [System.Text.UTF8Encoding]::new($false))
 
     Write-Host "Credenciais atualizadas no .env. Reiniciando serviços..."
 }
