@@ -3,9 +3,6 @@ import uuid
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.schemas.cidade import CidadePublic
-from app.schemas.comodidade import ComodidadePublic
-
 
 class HotelCreateSchema(BaseModel):
     """Dados recebidos para criar um hotel."""
@@ -14,6 +11,13 @@ class HotelCreateSchema(BaseModel):
     cidade_id: uuid.UUID
     categoria_estrelas: int = Field(ge=1, le=5)
     comodidade_ids: list[int] = Field(default_factory=list)
+
+
+class HotelUpdateSchema(BaseModel):
+    nome: str | None = Field(default=None, min_length=1, max_length=100)
+    cidade_id: uuid.UUID | None = None
+    categoria_estrelas: int | None = Field(default=None, ge=1, le=5)
+    comodidade_ids: list[int] | None = None
 
 
 class HotelResponseSchema(BaseModel):

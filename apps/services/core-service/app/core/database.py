@@ -18,7 +18,11 @@ def get_db():
 
 
 # --- Configuração do MongoDB ---
-mongo_client = AsyncIOMotorClient(settings.MONGODB_URL)
+mongo_client = AsyncIOMotorClient(
+    settings.MONGODB_URL,
+    serverSelectionTimeoutMS=3000,
+    connectTimeoutMS=3000,
+)
 mongo_db = mongo_client[settings.MONGODB_DB]
 
 

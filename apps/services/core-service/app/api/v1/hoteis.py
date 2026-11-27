@@ -4,11 +4,16 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.api.deps import get_current_admin
 from app.core.database import get_db, get_mongo_db
 from app.models.hotel import Cidade
 from app.mensagens import HOTEL_NAO_ENCONTRADO
-from app.models.hotel import Cidade
-from app.schemas.hotel import HotelCreateSchema, HotelResponseSchema
+from app.models.comodidade import Comodidade
+from app.models.hotel import Cidade, Hotel
+from app.models.interacao import Reserva
+from app.repositories.catalogo_repository import CatalogoRepository
+from app.schemas.hotel import HotelCreateSchema, HotelResponseSchema, HotelUpdateSchema
+from app.services.catalogo_sync_service import CatalogoSyncService
 from app.services.hotel_service import HotelService
 
 router = APIRouter(
@@ -26,6 +31,7 @@ async def criar_hotel(
     payload: HotelCreateSchema,
     db: Session = Depends(get_db),
     mongo_db=Depends(get_mongo_db),
+    _admin=Depends(get_current_admin),
 ):
     service = HotelService(db, mongo_db)
 
@@ -120,3 +126,4 @@ def listar_hoteis_por_cidade(
     service = HotelService(db, mongo_db)
 
     return service.list_by_cidade(cidade_id)
+

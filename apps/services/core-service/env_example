@@ -1,17 +1,14 @@
 PROJECT_NAME="Sistema de Reservas - Core Service"
 API_V1_STR="/api/v1"
 
-# PostgreSQL Config
+# PostgreSQL (use senha forte fora do ambiente local)
 POSTGRES_SERVER=localhost
 POSTGRES_USER=postgres
-POSTGRES_PASSWORD=postgres
+POSTGRES_PASSWORD=altere-esta-senha
 POSTGRES_DB=hotel_db_dev
 POSTGRES_PORT=5432
 
-# MongoDB Config
-MONGODB_URL=mongodb://USUARIO:SENHA@localhost:27017/?authSource=admin
+# MongoDB
+MONGODB_URL=mongodb://admin:SENHA_FORTE@localhost:27017/?authSource=admin
 MONGODB_DB=hotel_mongo_dev
 
-# Segurança da autenticação JWT
-# Gere uma chave aleatória segura para cada ambiente.
-JWT_SECRET_KEY=SUBSTITUA_POR_UMA_CHAVE_ALEATORIA_SEGURA

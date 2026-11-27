@@ -1,19 +1,31 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import './custom.css'
 import Login from './components/Login'
+import Cadastro from './components/Cadastro'
+import AdminPanel from './components/AdminPanel'
+import MinhasReservas from './components/MinhasReservas'
 import HotelDetalhes from './components/HotelDetalhes'
 
-const API_URL = 'http://localhost:8000'
+const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/$/, '')
 
 function App() {
   const [tela, setTela] = useState('home')
-  const [usuarioLogado, setUsuarioLogado] = useState(
-  localStorage.getItem('access_token')
-)
+  const [usuarioLogado, setUsuarioLogado] = useState(null)
   const [hotelSelecionado, setHotelSelecionado] = useState(null)
   const [hoteis, setHoteis] = useState([])
+  const [cidades, setCidades] = useState([])
+  const [erroCidades, setErroCidades] = useState('')
   const [loading, setLoading] = useState(true)
   const [erro, setErro] = useState(null)
+  const [favoritos, setFavoritos] = useState(() => {
+    try {
+      const salvos = JSON.parse(localStorage.getItem('hotel_favoritos') || '[]')
+      return Array.isArray(salvos) ? salvos : []
+    } catch {
+      return []
+    }
+  })
+  const requisicaoEmAndamento = useRef(false)
 
   const [cidade, setCidade] = useState('')
   const [estrelas, setEstrelas] = useState('')
@@ -24,9 +36,87 @@ function App() {
 
   useEffect(() => {
     carregarHoteis()
+    carregarCidades()
+    validarSessao()
   }, [])
 
+  async function validarSessao() {
+    const token = localStorage.getItem('access_token')
+    if (!token) return
+    try {
+      const response = await fetch(`${API_URL}/api/v1/auth/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (!response.ok) throw new Error('Sessão expirada')
+      const usuario = await response.json()
+      setUsuarioLogado(usuario)
+      const favoritosResponse = await fetch(`${API_URL}/api/v1/favoritos`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      if (favoritosResponse.ok) {
+        const dados = await favoritosResponse.json()
+        const remotos = dados.map(item => item.hotel_id)
+        let locais = []
+        try {
+          const salvos = JSON.parse(localStorage.getItem('hotel_favoritos') || '[]')
+          if (Array.isArray(salvos)) locais = salvos.filter(id => typeof id === 'string')
+        } catch {
+          locais = []
+        }
+        for (const hotelId of locais) {
+          if (remotos.includes(hotelId)) continue
+          const sync = await fetch(`${API_URL}/api/v1/favoritos/${hotelId}`, {
+            method: 'PUT',
+            headers: { Authorization: `Bearer ${token}` },
+          })
+          if (sync.ok) remotos.push(hotelId)
+        }
+        setFavoritos([...new Set(remotos)])
+      }
+    } catch {
+      localStorage.removeItem('access_token')
+      setUsuarioLogado(null)
+    }
+  }
+
+  async function carregarCidades() {
+    try {
+      const response = await fetch(`${API_URL}/api/v1/cidades`)
+      if (!response.ok) throw new Error('Não foi possível carregar as cidades.')
+      const data = await response.json()
+      setCidades(Array.isArray(data) ? data : [])
+      setErroCidades('')
+    } catch (error) {
+      console.error(error)
+      setErroCidades('Não foi possível carregar as cidades.')
+    }
+  }
+
+  useEffect(() => {
+    localStorage.setItem('hotel_favoritos', JSON.stringify(favoritos))
+  }, [favoritos])
+
+  async function alternarFavorito(hotelId) {
+    const token = localStorage.getItem('access_token')
+    const jaFavorito = favoritos.includes(hotelId)
+    if (token) {
+      try {
+        const response = await fetch(`${API_URL}/api/v1/favoritos/${hotelId}`, {
+          method: jaFavorito ? 'DELETE' : 'PUT',
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        if (!response.ok) throw new Error('Não foi possível atualizar o favorito.')
+      } catch (error) {
+        setErro(error.message)
+        return
+      }
+    }
+    setFavoritos(atuais => jaFavorito ? atuais.filter(id => id !== hotelId) : [...atuais, hotelId])
+  }
+
   async function carregarHoteis() {
+    if (requisicaoEmAndamento.current) return
+    requisicaoEmAndamento.current = true
     try {
       setLoading(true)
 
@@ -45,10 +135,13 @@ function App() {
       setErro('Não foi possível carregar os hotéis.')
     } finally {
       setLoading(false)
+      requisicaoEmAndamento.current = false
     }
   }
 
   async function pesquisar() {
+    if (requisicaoEmAndamento.current) return
+    requisicaoEmAndamento.current = true
     try {
       setLoading(true)
 
@@ -60,6 +153,13 @@ function App() {
 
       if (estrelas) {
         params.append('estrelas', estrelas)
+      }
+
+      params.append('adultos', String(adultos))
+      params.append('criancas', String(criancas))
+      if (checkin && checkout) {
+        params.append('checkin', checkin)
+        params.append('checkout', checkout)
       }
 
       const url = `${API_URL}/api/v1/busca/hoteis${
@@ -81,25 +181,38 @@ function App() {
       setErro('Não foi possível realizar a busca.')
     } finally {
       setLoading(false)
+      requisicaoEmAndamento.current = false
     }
   }
 
   if (tela === 'login') {
-  return (
-    <Login
-      onVoltar={() => setTela('home')}
-      onLogin={(token) => {
-        setUsuarioLogado(token)
-        setTela('home')
-      }}
-    />
-  )
-}
+    return <Login onVoltar={() => setTela('home')} onIrCadastro={() => setTela('cadastro')} onLogin={async () => { await validarSessao(); setTela('home') }} />
+  }
+
+  if (tela === 'cadastro') {
+    return <Cadastro onVoltar={() => setTela('login')} onCadastro={async (email, senha) => {
+      const response = await fetch(`${API_URL}/api/v1/auth/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, senha }) })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.detail || 'Conta criada, mas não foi possível entrar.')
+      localStorage.setItem('access_token', data.access_token)
+      await validarSessao()
+      setTela('home')
+    }} />
+  }
+
+  if (tela === 'reservas' && usuarioLogado) {
+    return <MinhasReservas token={localStorage.getItem('access_token')} onVoltar={() => setTela('home')} />
+  }
+
+  if (tela === 'admin' && usuarioLogado?.is_admin) {
+    return <AdminPanel token={localStorage.getItem('access_token')} onVoltar={() => setTela('home')} />
+  }
 
   if (tela === 'detalhes' && hotelSelecionado) {
     return (
       <HotelDetalhes
         hotel={hotelSelecionado}
+        token={localStorage.getItem('access_token')}
         onVoltar={() => setTela('home')}
       />
     )
@@ -130,8 +243,8 @@ function App() {
 
         <nav className="hotel-nav">
           <a href="#inicio">◉ <span>Explorar</span></a>
-          <a href="#reservas">▣ <span>Minhas reservas</span></a>
-          <a href="#favoritos">♡ <span>Favoritos</span></a>
+          <a href="#hoteis">▣ <span>Hotéis</span></a>
+          <a href="#favoritos">♡ <span>Favoritos ({favoritos.length})</span></a>
         </nav>
 
         <div className="user-area">
@@ -139,13 +252,16 @@ function App() {
 
         {usuarioLogado ? (
           <>
-            <span>Olá, {usuarioLogado}</span>
+            {usuarioLogado.is_admin && <button type="button" className="login-button" onClick={() => setTela('admin')}>Administração</button>}
+            <button type="button" className="login-button" onClick={() => setTela('reservas')}>Minhas reservas</button>
+            <span>Olá, {usuarioLogado.nome || 'usuário'}</span>
 
             <button type="button"
               className="login-button"
               onClick={() => {
                 localStorage.removeItem('access_token')
                 setUsuarioLogado(null)
+                setFavoritos([])
               }}
             >
               Sair
@@ -196,12 +312,19 @@ function App() {
               <div>
                 <label>Para onde?</label>
 
-                <input
-                  type="text"
-                  placeholder="ID da cidade"
+                <select
+                  aria-label="Destino"
                   value={cidade}
                   onChange={(e) => setCidade(e.target.value)}
-                />
+                >
+                  <option value="">Todas as cidades</option>
+                  {cidades.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.nome} - {item.estado}
+                    </option>
+                  ))}
+                </select>
+                {erroCidades && <small role="alert">{erroCidades}</small>}
               </div>
             </div>
 
@@ -281,24 +404,37 @@ function App() {
               </div>
             </div>
 
-            <button type="button"
+            <button
+              type="button"
               className="search-button"
-              onClick={pesquisar}
+              onClick={() => {
+                if (Boolean(checkin) !== Boolean(checkout)) {
+                  setErro('Informe as duas datas para pesquisar disponibilidade.')
+                  return
+                }
+                if (checkin && checkout && checkout <= checkin) {
+                  setErro('A data de check-out deve ser posterior ao check-in.')
+                  return
+                }
+                pesquisar()
+              }}
+              disabled={loading}
+              aria-busy={loading}
             >
-              Pesquisar
+              {loading ? 'Buscando...' : 'Pesquisar'}
             </button>
 
           </div>
         </section>
 
         {/* HOTELS */}
-        <section className="hotel-section">
+        <section className="hotel-section" id="hoteis">
 
           <div className="section-heading">
             <h2>Sugestões para você</h2>
 
-            <button type="button" onClick={carregarHoteis}>
-              Ver todas →
+            <button type="button" onClick={carregarHoteis} disabled={loading}>
+              {loading ? 'Carregando...' : 'Ver todas →'}
             </button>
           </div>
 
@@ -331,15 +467,10 @@ function App() {
 
                 const preco = menorPreco(hotel)
 
-                return (
-                  <article
-                      className="hotel-card"
-                      key={hotel.hotel_id}
-                      onClick={() => {
-                        setHotelSelecionado(hotel)
-                        setTela('detalhes')
-                      }}>
+                const favorito = favoritos.includes(hotel.hotel_id)
 
+                return (
+                  <article className="hotel-card" key={hotel.hotel_id}>
                     <div className="hotel-image">
 
                       <img
@@ -361,8 +492,14 @@ function App() {
                         alt={hotel.nome}
                       />
 
-                      <button type="button" className="favorite-button">
-                        ♡
+                      <button
+                        type="button"
+                        className="favorite-button"
+                        aria-label={favorito ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
+                        aria-pressed={favorito}
+                        onClick={() => alternarFavorito(hotel.hotel_id)}
+                      >
+                        {favorito ? '♥' : '♡'}
                       </button>
                     </div>
 
@@ -418,6 +555,16 @@ function App() {
 
                     </div>
 
+                    <button
+                      type="button"
+                      className="hotel-open-button"
+                      onClick={() => {
+                        setHotelSelecionado(hotel)
+                        setTela('detalhes')
+                      }}
+                    >
+                      Ver detalhes
+                    </button>
                   </article>
                 )
               })}
@@ -433,7 +580,38 @@ function App() {
 
         </section>
 
-                {/* AVALIAÇÕES */}
+        <section className="favorites-section" id="favoritos" aria-labelledby="favorites-title">
+          <div className="section-heading">
+            <h2 id="favorites-title">Seus favoritos</h2>
+          </div>
+          {favoritos.length === 0 ? (
+            <p className="empty-message">Você ainda não adicionou hotéis aos favoritos.</p>
+          ) : (
+            hoteis.some((hotel) => favoritos.includes(hotel.hotel_id)) ? (
+              <ul className="favorites-list">
+                {hoteis.filter((hotel) => favoritos.includes(hotel.hotel_id)).map((hotel) => (
+                  <li key={hotel.hotel_id}>
+                    <button type="button" onClick={() => {
+                      setHotelSelecionado(hotel)
+                      setTela('detalhes')
+                    }}>
+                      {hotel.nome} — {hotel.cidade_nome}, {hotel.cidade_estado}
+                    </button>
+                    <button type="button" onClick={() => alternarFavorito(hotel.hotel_id)}>
+                      Remover
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="empty-message">
+                Seus favoritos continuam salvos. Clique em “Ver todas” para carregar a lista completa de hotéis.
+              </p>
+            )
+          )}
+        </section>
+
+        {/* AVALIAÇÕES */}
         <section className="reviews-section">
           <div className="reviews-header">
             <div className="reviews-icon">

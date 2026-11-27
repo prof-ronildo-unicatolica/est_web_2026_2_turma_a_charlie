@@ -1,16 +1,19 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 
-const API_URL = 'http://localhost:8000'
+const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/$/, '')
 
-export default function Login({ onVoltar, onLogin }) {
+export default function Login({ onVoltar, onLogin, onIrCadastro }) {
   const [email, setEmail] = useState('')
   const [senha, setSenha] = useState('')
   const [erro, setErro] = useState('')
   const [carregando, setCarregando] = useState(false)
+  const envioEmAndamento = useRef(false)
 
   async function fazerLogin(event) {
     event.preventDefault()
 
+    if (envioEmAndamento.current) return
+    envioEmAndamento.current = true
     setErro('')
     setCarregando(true)
 
@@ -33,23 +36,25 @@ export default function Login({ onVoltar, onLogin }) {
         throw new Error(data.detail || 'E-mail ou senha incorretos.')
       }
 
-    // O backend básico retorna o e-mail como access_token.
-    localStorage.setItem('access_token', data.access_token)
+      if (typeof data.access_token !== 'string' || !data.access_token.trim()) {
+        throw new Error('A API não retornou um token de acesso válido.')
+      }
 
-     // Atualiza o App e volta para a Home.
-    onLogin(data.access_token)
+      localStorage.setItem('access_token', data.access_token)
+      await onLogin()
 
     } catch (error) {
       console.error(error)
       setErro(error.message)
     } finally {
       setCarregando(false)
+      envioEmAndamento.current = false
     }
   }
 
   return (
     <div className="login-page">
-      <div className="login-card">
+      <div className="login-card" aria-busy={carregando}>
 
         <h1>Bem-vindo de volta</h1>
 
@@ -82,7 +87,7 @@ export default function Login({ onVoltar, onLogin }) {
           </div>
 
           {erro && (
-            <div className="login-error">
+            <div className="login-error" role="alert">
               {erro}
             </div>
           )}
@@ -97,6 +102,9 @@ export default function Login({ onVoltar, onLogin }) {
 
         </form>
 
+        <button type="button" className="login-back" onClick={onIrCadastro}>
+          Ainda não tem conta? Cadastre-se
+        </button>
         <button
           type="button"
           className="login-back"

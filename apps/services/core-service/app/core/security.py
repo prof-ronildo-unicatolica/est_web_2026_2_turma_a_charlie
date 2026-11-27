@@ -4,7 +4,7 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from app.core.config import settings
 
-SECRET_KEY = settings.JWT_SECRET_KEY
+
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
@@ -24,26 +24,15 @@ def verificar_senha(senha: str, senha_hash: str) -> bool:
 
 def criar_access_token(data: dict) -> str:
     dados = data.copy()
-
     expire = datetime.now(timezone.utc) + timedelta(
         minutes=ACCESS_TOKEN_EXPIRE_MINUTES
     )
-
     dados.update({"exp": expire})
-
-    return jwt.encode(
-        dados,
-        SECRET_KEY,
-        algorithm=ALGORITHM,
-    )
+    return jwt.encode(dados, SECRET_KEY, algorithm=ALGORITHM)
 
 
 def decodificar_access_token(token: str) -> dict | None:
     try:
-        return jwt.decode(
-            token,
-            SECRET_KEY,
-            algorithms=[ALGORITHM],
-        )
+        return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
     except JWTError:
         return None

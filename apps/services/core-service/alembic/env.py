@@ -9,6 +9,7 @@ from app.core.config import settings
 from app.models import (
     comodidade,  # noqa: F401
     hotel,  # noqa: F401
+    interacao,  # noqa: F401
     servico_adicional,  # noqa: F401
     tarifa_temporada,  # noqa: F401
     usuario,  # noqa: F401

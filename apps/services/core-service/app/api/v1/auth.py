@@ -26,8 +26,16 @@ def register(
 ):
     """Cadastra um usuário comum; privilégios administrativos não são públicos."""
 
+    nome = payload.nome.strip()
+    if len(nome) < 2:
+        raise HTTPException(status_code=422, detail='Informe um nome válido')
+
+    email = payload.email.strip().lower()
+    if '@' not in email or '.' not in email.rsplit('@', 1)[-1]:
+        raise HTTPException(status_code=422, detail='Informe um e-mail válido')
+
     usuario_existente = db.execute(
-        select(Usuario).where(Usuario.email == payload.email)
+        select(Usuario).where(Usuario.email == email)
     ).scalar_one_or_none()
 
     if usuario_existente is not None:
@@ -37,8 +45,8 @@ def register(
         )
 
     novo_usuario = Usuario(
-        nome=payload.nome,
-        email=payload.email,
+        nome=nome,
+        email=email,
         senha_hash=hash_senha(payload.senha),
         is_admin=False,
     )
@@ -56,7 +64,7 @@ def login(
 ):
     """Autentica o usuário e retorna um JWT."""
 
-    usuario = autenticar_credenciais(payload.email, payload.senha, db)
+    usuario = autenticar_credenciais(payload.email.strip().lower(), payload.senha, db)
 
     if usuario is None:
         raise HTTPException(
