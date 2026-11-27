@@ -2,9 +2,6 @@ import uuid
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.schemas.cidade import CidadePublic
-from app.schemas.comodidade import ComodidadePublic
-
 
 class HotelCreateSchema(BaseModel):
     """Dados recebidos para criar um hotel."""
