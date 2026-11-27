@@ -16,6 +16,9 @@ from app.core.config import settings
 from app.core.database import get_mongo_db
 from app.core.seed_mongo import seed_mongo_users
 from app.core.seed_admin import seed_initial_admin
+from app.core.database import SessionLocal
+from app.models.hotel import Hotel
+from app.services.catalogo_sync_service import CatalogoSyncService
 
 
 @asynccontextmanager
@@ -24,6 +27,11 @@ async def lifespan(app: FastAPI):
     mongo_db = get_mongo_db()
     await mongo_db.command('ping')
     await seed_mongo_users(mongo_db)
+    with SessionLocal() as db:
+        hotel_ids = [item[0] for item in db.query(Hotel.id).all()]
+        catalogo = CatalogoSyncService(db, mongo_db)
+        for hotel_id in hotel_ids:
+            await catalogo.sincronizar_hotel(hotel_id)
     yield
 
 
