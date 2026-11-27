@@ -34,7 +34,7 @@ cp .env.example .env
 docker compose up -d --build
 
 # 4. Confirme que a API respondeu
-curl http://localhost:8000/health
+curl http://localhost:8000/api/v1/health
 ```
 
 | Serviço | Endereço |
