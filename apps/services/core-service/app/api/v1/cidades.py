@@ -4,9 +4,10 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_current_admin
-from app.core.database import get_db
+from app.core.database import get_db, get_mongo_db
 from app.models.hotel import Cidade, Hotel
 from app.schemas.cidade import CidadeCreate, CidadePublic, CidadeUpdate
+from app.services.catalogo_sync_service import CatalogoSyncService
 from app.services.hotel_service import CidadeService
 
 router = APIRouter(
@@ -58,10 +59,11 @@ def listar_cidades(
 
 
 @router.patch("/{cidade_id}", response_model=CidadePublic)
-def atualizar_cidade(
+async def atualizar_cidade(
     cidade_id: uuid.UUID,
     payload: CidadeUpdate,
     db: Session = Depends(get_db),
+    mongo_db=Depends(get_mongo_db),
     _admin=Depends(get_current_admin),
 ):
     cidade = db.query(Cidade).filter(Cidade.id == cidade_id).first()
@@ -86,6 +88,10 @@ def atualizar_cidade(
 
     db.commit()
     db.refresh(cidade)
+    catalogo = CatalogoSyncService(db, mongo_db)
+    hotel_ids = [item[0] for item in db.query(Hotel.id).filter(Hotel.cidade_id == cidade_id).all()]
+    for hotel_id in hotel_ids:
+        await catalogo.sincronizar_hotel(hotel_id)
     return cidade
 
 
