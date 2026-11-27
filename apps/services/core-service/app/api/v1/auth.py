@@ -26,6 +26,10 @@ def register(
 ):
     """Cadastra um usuário comum; privilégios administrativos não são públicos."""
 
+    nome = payload.nome.strip()
+    if len(nome) < 2:
+        raise HTTPException(status_code=422, detail='Informe um nome válido')
+
     email = payload.email.strip().lower()
     if '@' not in email or '.' not in email.rsplit('@', 1)[-1]:
         raise HTTPException(status_code=422, detail='Informe um e-mail válido')
@@ -41,7 +45,7 @@ def register(
         )
 
     novo_usuario = Usuario(
-        nome=payload.nome.strip(),
+        nome=nome,
         email=email,
         senha_hash=hash_senha(payload.senha),
         is_admin=False,
