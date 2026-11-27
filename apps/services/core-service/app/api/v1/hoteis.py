@@ -1,6 +1,8 @@
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, status
+
+from app.api.deps import get_current_admin
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db, get_mongo_db
@@ -24,6 +26,7 @@ async def criar_hotel(
     payload: HotelCreateSchema,
     db: Session = Depends(get_db),
     mongo_db=Depends(get_mongo_db),
+    _admin=Depends(get_current_admin),
 ):
     service = HotelService(db, mongo_db)
 
