@@ -118,6 +118,10 @@ export default function AdminPanel({ token, onVoltar }) {
     if (adultos === null) return
     const criancas = window.prompt('Capacidade de crianças:', String(item.max_criancas))
     if (criancas === null) return
+    if (!tipo.trim() || !Number.isFinite(Number(preco)) || Number(preco) <= 0 || !Number.isInteger(Number(adultos)) || Number(adultos) < 1 || !Number.isInteger(Number(criancas)) || Number(criancas) < 0) {
+      setMensagem('Informe tipo, diária positiva e capacidades válidas.')
+      return
+    }
     try {
       await requisitar(`/quartos/${item.id}`, {
         method: 'PUT',
