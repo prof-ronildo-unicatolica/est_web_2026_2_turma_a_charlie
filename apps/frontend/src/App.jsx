@@ -481,21 +481,27 @@ function App() {
           {favoritos.length === 0 ? (
             <p className="empty-message">Você ainda não adicionou hotéis aos favoritos.</p>
           ) : (
-            <ul className="favorites-list">
-              {hoteis.filter((hotel) => favoritos.includes(hotel.hotel_id)).map((hotel) => (
-                <li key={hotel.hotel_id}>
-                  <button type="button" onClick={() => {
-                    setHotelSelecionado(hotel)
-                    setTela('detalhes')
-                  }}>
-                    {hotel.nome} — {hotel.cidade_nome}, {hotel.cidade_estado}
-                  </button>
-                  <button type="button" onClick={() => alternarFavorito(hotel.hotel_id)}>
-                    Remover
-                  </button>
-                </li>
-              ))}
-            </ul>
+            {hoteis.some((hotel) => favoritos.includes(hotel.hotel_id)) ? (
+              <ul className="favorites-list">
+                {hoteis.filter((hotel) => favoritos.includes(hotel.hotel_id)).map((hotel) => (
+                  <li key={hotel.hotel_id}>
+                    <button type="button" onClick={() => {
+                      setHotelSelecionado(hotel)
+                      setTela('detalhes')
+                    }}>
+                      {hotel.nome} — {hotel.cidade_nome}, {hotel.cidade_estado}
+                    </button>
+                    <button type="button" onClick={() => alternarFavorito(hotel.hotel_id)}>
+                      Remover
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="empty-message">
+                Seus favoritos continuam salvos. Clique em “Ver todas” para carregar a lista completa de hotéis.
+              </p>
+            )}
           )}
         </section>
 
