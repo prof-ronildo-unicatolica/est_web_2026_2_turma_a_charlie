@@ -56,9 +56,10 @@ class Hotel(Base):
     )
 
     cidade_id: Mapped[uuid.UUID] = mapped_column(
-        ForeignKey("cidades.id", ondelete="CASCADE"),
-        nullable=False,
-    )
+    ForeignKey("cidades.id", ondelete="CASCADE"),
+    nullable=False,
+    index=True,
+)
 
     categoria_estrelas: Mapped[int] = mapped_column(
         nullable=False,
