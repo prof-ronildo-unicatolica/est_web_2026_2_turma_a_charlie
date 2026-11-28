@@ -6,6 +6,7 @@ Revises: cabf07da68d0
 from typing import Sequence, Union
 
 import sqlalchemy as sa
+
 from alembic import op
 
 revision: str = "20261127_interacoes"
@@ -15,7 +16,8 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.create_table(
+    if not sa.inspect(op.get_bind()).has_table("reservas"):
+        op.create_table(
         "reservas",
         sa.Column("id", sa.Uuid(), nullable=False),
         sa.Column("usuario_id", sa.Uuid(), nullable=False),
@@ -35,10 +37,10 @@ def upgrade() -> None:
         sa.ForeignKeyConstraint(["hotel_id"], ["hoteis.id"], ondelete="CASCADE"),
         sa.ForeignKeyConstraint(["quarto_id"], ["quartos.id"], ondelete="CASCADE"),
         sa.PrimaryKeyConstraint("id"),
-    )
-    op.create_index("ix_reservas_usuario_id", "reservas", ["usuario_id"])
-    op.create_index("ix_reservas_hotel_id", "reservas", ["hotel_id"])
-    op.create_index("ix_reservas_quarto_id", "reservas", ["quarto_id"])
+        )
+        op.create_index("ix_reservas_usuario_id", "reservas", ["usuario_id"])
+        op.create_index("ix_reservas_hotel_id", "reservas", ["hotel_id"])
+        op.create_index("ix_reservas_quarto_id", "reservas", ["quarto_id"])
 
     op.create_table(
         "avaliacoes",
@@ -72,7 +74,26 @@ def upgrade() -> None:
     op.create_index("ix_favoritos_hotel_id", "favoritos", ["hotel_id"])
 
 
+
+
 def downgrade() -> None:
+    outra_aplicada = op.get_bind().execute(
+        sa.text(
+            """
+            SELECT EXISTS (
+                SELECT 1 FROM alembic_version
+                WHERE version_num = '91af5a83eb21'
+            )
+            """
+        )
+    ).scalar_one()
+
+    if outra_aplicada:
+        raise RuntimeError(
+            "Reversao bloqueada: a outra migracao "
+            "de reservas tambem esta aplicada."
+        )
+
     op.drop_table("favoritos")
     op.drop_table("avaliacoes")
     op.drop_table("reservas")
